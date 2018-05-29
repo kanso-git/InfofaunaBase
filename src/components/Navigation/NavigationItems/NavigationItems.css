@@ -1,0 +1,20 @@
+.NavigationItems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: block;
+  align-items: center;
+  height: 100%;
+}
+
+.Button {
+  color: white;
+}
+.Button:hover {
+  color: #40a4c8;
+}
+@media (min-width: 500px) {
+  .NavigationItems {
+    display: flex;
+  }
+}

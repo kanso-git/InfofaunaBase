@@ -1,0 +1,96 @@
+.Limiter {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ContainerLogin100 {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background: #ebeeef;
+}
+
+.WrapLogin100 {
+
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+
+.Login100FormTitle {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+
+  padding: 70px 15px 74px 15px;
+}
+
+.Login100FormTitle1 {
+  font-family: Poppins-Bold;
+  font-size: 30px;
+  color: #fff;
+  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.Login100FormTitle::before {
+  content: '';
+  display: block;
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(54, 84, 99, 0.7);
+}
+
+.ErrorLogin{
+    display: block;
+    margin: 20px 0;
+    padding: 15px 30px 15px 15px;
+    border-left: 5px solid #d9534f;
+    background-color: #f4cecd;
+}
+/**
+@media (max-width: 500px) {
+  .WrapLogin100 {
+    width: 100% ;
+
+  }
+  .ContainerLogin100 {
+    min-height: 100vh;
+    align-items: flex-start;
+    width: 92% ;
+  }
+}
+
+@media (min-width: 600px ) and (max-width: 1100px){
+  .ContainerLogin100 {
+    min-height: 100vh;
+    align-items: flex-start;
+  }
+  .WrapLogin100 {
+    width: 670px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+}
+**/
