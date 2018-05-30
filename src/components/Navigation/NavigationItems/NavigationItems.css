@@ -4,7 +4,10 @@
   list-style: none;
   display: block;
   align-items: center;
+  justify-content: center;
   height: 100%;
+
+
 }
 
 .Button {
@@ -16,5 +19,27 @@
 @media (min-width: 500px) {
   .NavigationItems {
     display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    vertical-align: bottom;
+    justify-content: flex-end;
+
   }
+}
+
+.User{
+  font-size: 14px;
+  text-transform: lowercase;
+  margin-left: 3px;
+}
+
+.Caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
 }

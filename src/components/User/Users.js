@@ -9,11 +9,12 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ExplorIcon from '@material-ui/icons/Explore';
 import Tooltip from '@material-ui/core/Tooltip';
 
 
 import axios from '../../axios-infofauna';
-import cssProjects from './Projects.css'
+import cssUsers from './Users.css'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -24,7 +25,7 @@ const styles = theme => ({
     textField: {
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
-        width: 200,
+        width: 300,
     },
     button: {
         margin: theme.spacing.unit,
@@ -32,7 +33,7 @@ const styles = theme => ({
     buttonExtraSmall: {
         marginLeft: 3,
         marginRight: 3,
-
+        
     },
     fab: {
         margin: theme.spacing.unit * 2,
@@ -45,22 +46,20 @@ const styles = theme => ({
 });
 
 
-class Projects extends Component {
+class Users extends Component {
 
     state = {
         data: [],
         pages: null,
         loading: true,
-        searchCodeName: '',
-        searchInstitutionName: ''
-
+        filtered: ''
     };
 
-    handleFiltered = (key, e) => {
+    handleFiltered = async (e) => {
         const filtered = e.target.value;
-        const updatedState = {...this.state, [key]:filtered, page: 0};
+        const updatedState = {...this.state, filtered, page: 0};
         this.setState(() => ({
-            [key]: filtered,
+            filtered,
             page: 0
         }))
 
@@ -68,20 +67,19 @@ class Projects extends Component {
 
     }
 
-    // pageSize=20&page=1&orderBy=designation&sortOrder=asc&searchCodeName=Biodiv&searchInstitutionName=AQUABUG
-
-    requestData = async (pageSize, page = 1, sorted, searchCodeName, searchInstitutionName) => {
+    //  //api/projects/?pageSize=20&page=1&orderBy=designation&sortOrder=asc
+    requestData = async (pageSize, page = 1, sorted, filtered) => {
         const params = {
             pageSize,
             page: page + 1,
             orderBy: sorted[0].id,
             sortOrder: sorted[0].desc ? 'desc' : 'asc',
-            searchCodeName,
-            searchInstitutionName,
+            search: filtered
         }
         const reqParam = Object.keys(params).map(k => `${k}=${params[k]}`).join('&');
-        console.log(reqParam);
-        const res = await axios.get(`/api/projects/?${reqParam}`);
+        const url = `/api/users/?${reqParam}`;
+        console.log(url);
+        const res = await axios.get(url);
         return res;
 
     }
@@ -97,8 +95,7 @@ class Projects extends Component {
             state.pageSize,
             state.page,
             state.sorted,
-            state.searchCodeName ? state.searchCodeName : '',
-            state.searchInstitutionName ? state.searchInstitutionName : ''
+            state.filtered ? state.filtered : ''
         )
         this.setState({
             data: res.data.rows,
@@ -112,43 +109,33 @@ class Projects extends Component {
         const {classes} = this.props;
         const {data, pages, loading} = this.state;
         return (
-            <div className={cssProjects.PersonsContainer}>
+            <div className={cssUsers.PersonsContainer}>
                 <Paper className={classes.root} elevation={4}>
                     <Typography variant="headline" component="h3">
-                        Gestion des projects
+                        Gestion des utilisateurs
                     </Typography>
                     <Typography component="p">
-                        Gestion des projets, ajouter, modifier et supprimer
+                        Gestion des utilisateurs, ajouter, modifier et supprimer
                     </Typography>
 
 
                     <TextField
                         id="name"
-                        label="Filtrer par code/nom :"
+                        label="Filtrer par nom d'utilisateur"
                         className={classes.textField}
-                        value={this.state.searchCodeName}
-                        onChange={(event) => this.handleFiltered('searchCodeName', event)}
+                        value={this.state.filtered}
+                        onChange={this.handleFiltered}
                         margin="normal"
                     />
-
-                    <TextField
-                        id="name"
-                        label="Filtrer par institution"
-                        className={classes.textField}
-                        value={this.state.searchInstitutionName}
-                        onChange={(event) => this.handleFiltered('searchInstitutionName', event)}
-                        margin="normal"
-                    />
-
                     <div style={{float: 'right'}}>
-                        <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+                        <Tooltip id="tooltip-fab" title="Ajouter une nouveau utilisateur">
                             <Button variant="fab" color="primary" aria-label="add" className={classes.button}>
                                 <AddIcon/>
                             </Button>
                         </Tooltip>
                     </div>
 
-                    <div style={{height: 20}}>
+                    <div style={{height:20}}>
 
                     </div>
                     <ReactTable
@@ -174,45 +161,58 @@ class Projects extends Component {
                         }}
                         columns={[
                             {
-                                Header: "Projet",
+                                Header: "Utilisateur",
 
                                 columns: [{
-                                    Header: "Code IFF",
-                                    accessor: "code",
+                                    Header: "Login",
+                                    accessor: "username",
                                     maxWidth: 150,
 
                                 },
                                     {
-                                        Header: "Nom",
-                                        accessor: "designation",
+                                        Header: "Personne",
+                                        accessor: "person",
+                                        Cell: row => (
+                                            <div>
+                                                {row.value? `${row.value.firstName} ${row.value.lastName}`:''}
+                                            </div>
+                                        )
                                     }
-                                    ,
-
-                                    {
-                                        Header: "Type",
-                                        accessor: "projectTypeI18n",
-                                        maxWidth: 150,
-                                        sortable: false,
-
-                                    }
-                                    ]
+                                ]
                             },
 
                             {
-                                Header: "Institution",
+                                Header: "Authentification",
                                 columns: [
                                     {
-                                        Header: "Mandante",
-                                        accessor: "principalInstitution.name",
+                                        Header: "LDAP",
+                                        accessor: "ldap",
                                         sortable: false,
-                                        maxWidth: 300
-                                    },
-                                    {
-                                        Header: "Mandataire",
-                                        accessor: "mandataryInstitution.name",
-                                        sortable: false,
-                                        maxWidth: 300
+                                        maxWidth: 200,
+                                        Cell: row => (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    backgroundColor: '#dadada',
+                                                    borderRadius: '2px'
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        width: `${row.value*100}%`,
+                                                        height: '100%',
+                                                        backgroundColor: row.value > 66 ? '#85cc00'
+                                                            : row.value > 33 ? '#ffbf00'
+                                                                : '#85cc00',
+                                                        borderRadius: '2px',
+                                                        transition: 'all .2s ease-out'
+                                                    }}
+                                                />
+                                            </div>
+                                        )
                                     }
+
                                 ]
                             },
                             {
@@ -226,7 +226,7 @@ class Projects extends Component {
                                         Cell: row => (
                                             <div>
                                                 <Tooltip id="tooltip-fab" title="Modifier la personne">
-                                                    <Button variant="fab" mini aria-label="edit"
+                                                    <Button variant="fab" mini  aria-label="edit"
                                                             className={classes.buttonExtraSmall}>
                                                         <Icon>edit_icon</Icon>
                                                     </Button>
@@ -257,7 +257,7 @@ class Projects extends Component {
                         className="-striped -highlight"
                         defaultSorted={[
                             {
-                                id: "designation",
+                                id: "username",
                                 desc: false
                             }
                         ]}
@@ -273,9 +273,9 @@ class Projects extends Component {
 
 }
 
-Projects.propTypes = {
+Users.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Projects);
+export default withStyles(styles)(Users);
 

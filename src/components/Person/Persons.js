@@ -9,11 +9,12 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ExplorIcon from '@material-ui/icons/Explore';
 import Tooltip from '@material-ui/core/Tooltip';
 
 
 import axios from '../../axios-infofauna';
-import cssProjects from './Projects.css'
+import cssPersons from './Persons.css'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -32,7 +33,7 @@ const styles = theme => ({
     buttonExtraSmall: {
         marginLeft: 3,
         marginRight: 3,
-
+        
     },
     fab: {
         margin: theme.spacing.unit * 2,
@@ -45,22 +46,20 @@ const styles = theme => ({
 });
 
 
-class Projects extends Component {
+class Persons extends Component {
 
     state = {
         data: [],
         pages: null,
         loading: true,
-        searchCodeName: '',
-        searchInstitutionName: ''
-
+        filtered: ''
     };
 
-    handleFiltered = (key, e) => {
+    handleFiltered = async (e) => {
         const filtered = e.target.value;
-        const updatedState = {...this.state, [key]:filtered, page: 0};
+        const updatedState = {...this.state, filtered, page: 0};
         this.setState(() => ({
-            [key]: filtered,
+            filtered,
             page: 0
         }))
 
@@ -68,20 +67,18 @@ class Projects extends Component {
 
     }
 
-    // pageSize=20&page=1&orderBy=designation&sortOrder=asc&searchCodeName=Biodiv&searchInstitutionName=AQUABUG
-
-    requestData = async (pageSize, page = 1, sorted, searchCodeName, searchInstitutionName) => {
+    //  //api/projects/?pageSize=20&page=1&orderBy=designation&sortOrder=asc
+    requestData = async (pageSize, page = 1, sorted, filtered) => {
         const params = {
             pageSize,
             page: page + 1,
             orderBy: sorted[0].id,
             sortOrder: sorted[0].desc ? 'desc' : 'asc',
-            searchCodeName,
-            searchInstitutionName,
+            search: filtered
         }
         const reqParam = Object.keys(params).map(k => `${k}=${params[k]}`).join('&');
         console.log(reqParam);
-        const res = await axios.get(`/api/projects/?${reqParam}`);
+        const res = await axios.get(`/api/persons/?${reqParam}`);
         return res;
 
     }
@@ -97,8 +94,7 @@ class Projects extends Component {
             state.pageSize,
             state.page,
             state.sorted,
-            state.searchCodeName ? state.searchCodeName : '',
-            state.searchInstitutionName ? state.searchInstitutionName : ''
+            state.filtered ? state.filtered : ''
         )
         this.setState({
             data: res.data.rows,
@@ -112,34 +108,24 @@ class Projects extends Component {
         const {classes} = this.props;
         const {data, pages, loading} = this.state;
         return (
-            <div className={cssProjects.PersonsContainer}>
+            <div className={cssPersons.PersonsContainer}>
                 <Paper className={classes.root} elevation={4}>
                     <Typography variant="headline" component="h3">
-                        Gestion des projects
+                        Gestion des personnes
                     </Typography>
                     <Typography component="p">
-                        Gestion des projets, ajouter, modifier et supprimer
+                        Gestion des personnes, ajouter, modifier et supprimer
                     </Typography>
 
 
                     <TextField
                         id="name"
-                        label="Filtrer par code/nom :"
+                        label="Filtrer par nom ou prénom"
                         className={classes.textField}
-                        value={this.state.searchCodeName}
-                        onChange={(event) => this.handleFiltered('searchCodeName', event)}
+                        value={this.state.filtered}
+                        onChange={this.handleFiltered}
                         margin="normal"
                     />
-
-                    <TextField
-                        id="name"
-                        label="Filtrer par institution"
-                        className={classes.textField}
-                        value={this.state.searchInstitutionName}
-                        onChange={(event) => this.handleFiltered('searchInstitutionName', event)}
-                        margin="normal"
-                    />
-
                     <div style={{float: 'right'}}>
                         <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
                             <Button variant="fab" color="primary" aria-label="add" className={classes.button}>
@@ -148,7 +134,7 @@ class Projects extends Component {
                         </Tooltip>
                     </div>
 
-                    <div style={{height: 20}}>
+                    <div style={{height:20}}>
 
                     </div>
                     <ReactTable
@@ -174,43 +160,53 @@ class Projects extends Component {
                         }}
                         columns={[
                             {
-                                Header: "Projet",
+                                Header: "Nom",
 
                                 columns: [{
-                                    Header: "Code IFF",
-                                    accessor: "code",
-                                    maxWidth: 150,
+                                    Header: "Titre académique",
+                                    accessor: "titleI18n",
+                                    sortable: false,
+                                    maxWidth: 100,
 
                                 },
                                     {
                                         Header: "Nom",
-                                        accessor: "designation",
+                                        id: "lastName",
+                                        accessor: "lastName",
+                                        style: {verticalAlign:'center'}
                                     }
                                     ,
 
                                     {
-                                        Header: "Type",
-                                        accessor: "projectTypeI18n",
-                                        maxWidth: 150,
-                                        sortable: false,
+                                        Header: "Prénom",
+                                        accessor: "firstName"
+                                    },
 
-                                    }
-                                    ]
+                                    {
+                                        Header: "Genre",
+                                        accessor: "genderI18n",
+                                        sortable: false,
+                                        maxWidth: 100
+                                    }]
                             },
 
                             {
-                                Header: "Institution",
+                                Header: "Info",
                                 columns: [
                                     {
-                                        Header: "Mandante",
-                                        accessor: "principalInstitution.name",
+                                        Header: "Pays",
+                                        accessor: "countryI18n",
                                         sortable: false,
-                                        maxWidth: 300
+                                        maxWidth: 120
                                     },
                                     {
-                                        Header: "Mandataire",
-                                        accessor: "mandataryInstitution.name",
-                                        sortable: false,
+                                        Header: "Localité",
+                                        accessor: "locality",
+                                        maxWidth: 150
+                                    },
+                                    {
+                                        Header: "E-mail",
+                                        accessor: "email",
                                         maxWidth: 300
                                     }
                                 ]
@@ -226,7 +222,7 @@ class Projects extends Component {
                                         Cell: row => (
                                             <div>
                                                 <Tooltip id="tooltip-fab" title="Modifier la personne">
-                                                    <Button variant="fab" mini aria-label="edit"
+                                                    <Button variant="fab" mini  aria-label="edit"
                                                             className={classes.buttonExtraSmall}>
                                                         <Icon>edit_icon</Icon>
                                                     </Button>
@@ -257,7 +253,7 @@ class Projects extends Component {
                         className="-striped -highlight"
                         defaultSorted={[
                             {
-                                id: "designation",
+                                id: "firstName",
                                 desc: false
                             }
                         ]}
@@ -273,9 +269,9 @@ class Projects extends Component {
 
 }
 
-Projects.propTypes = {
+Persons.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Projects);
+export default withStyles(styles)(Persons);
 

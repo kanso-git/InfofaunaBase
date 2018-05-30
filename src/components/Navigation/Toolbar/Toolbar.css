@@ -1,24 +1,32 @@
 .Toolbar {
-    height: 56px;
+    height: 120px;
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #703b09;
+    background-color: #2196f3;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     box-sizing: border-box;
     z-index: 90;
+    background: url(../../../assets/images/20170117-banner_CSCF.jpg) no-repeat #CCC ;
 }
 
 .Toolbar nav {
     height: 100%;
 }
 
+
 @media (max-width: 499px) {
     .DesktopOnly {
         display: none;
+
+    }
+    .Toolbar {
+        background:none;
+        background-color: #2196f3;
+        height: 60px;
     }
 }

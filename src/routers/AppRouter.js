@@ -10,6 +10,9 @@ import {connect} from "react-redux";
 import NotFoundPage from "../components/NotFoundPage/NotFoundPage";
 import Dashboard from "../components/Dashboard/Dashboard";
 import Projects from "../components/Project/Projects";
+import Persons from "../components/Person/Persons";
+import Institutions from "../components/Institution/Institutions";
+import Users from "../components/User/Users";
 
 const loadCurrentUserFromLocalStorage = () => {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_KEY))
@@ -32,7 +35,10 @@ const AppRouter = (props) => {
         <Router history={history}>
             <Switch>
                 <Route path="/login" exact component={Login}/>
+                <PrivateRoute path="/persons"  component={Persons}/>
                 <PrivateRoute path="/projects"  component={Projects}/>
+                <PrivateRoute path="/institutions"  component={Institutions}/>
+                <PrivateRoute path="/users"  component={Users}/>
                 <PrivateRoute path="/" exact component={Dashboard}/>
 
                 {/*

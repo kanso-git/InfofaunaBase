@@ -22,18 +22,23 @@ const errorLoadingListProjectsAction = payload => ({
 // axios
 const loadProjectsAxios = async (params) => {
     //api/projects/?pageSize=20&page=1&orderBy=designation&sortOrder=asc
-    return axios.get('/api/projects/list');
+
+    const reqParam = Object.key(params)
+        .map(k => `${k}=${params[k]}`).join('&')
+    console.log(`loadProjectsAxios :reqParam:${reqParam}`);
+    return axios.get(`/api/projects/?${reqParam}`);
 };
 
 
 
 // actions
 
-const initiateFetchOrders = () => dispatch =>
+const initiateFetchProjects = () => dispatch =>
     dispatch(initiateFetchProjectsAction());
-const loadOrdersList = () => async (dispatch, getState) => {
+
+const loadProjects = (param) => async (dispatch, getState) => {
     try {
-        const projects = await loadProjectsAxios();
+        const projects = await loadProjectsAxios(param);
         const projectsAction = listProjectsAction(projects.data);
         dispatch(projectsAction);
     } catch (e) {
@@ -44,6 +49,6 @@ const loadOrdersList = () => async (dispatch, getState) => {
 
 
 export {
-    loadOrdersList,
-    initiateFetchOrders
+    loadProjects,
+    initiateFetchProjects
 };
