@@ -3,4 +3,8 @@ import * as orderActions from './OrderActions';
 import * as authActions from './AuthActions';
 import * as projectActions from './ProjectActions';
 
-export { burgerActions, orderActions, authActions, projectActions };
+import * as personActions from './PersonActions';
+import * as thesaurusActions from './ThesaurusActions';
+
+
+export { burgerActions, orderActions, authActions, projectActions, personActions ,thesaurusActions};

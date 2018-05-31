@@ -1,5 +1,5 @@
 import React from 'react';
-import {Route, Router, Switch} from 'react-router-dom';
+import {Redirect, Route, Router, Switch} from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
@@ -9,10 +9,12 @@ import {authActions} from '../store/actions'
 import {connect} from "react-redux";
 import NotFoundPage from "../components/NotFoundPage/NotFoundPage";
 import Dashboard from "../components/Dashboard/Dashboard";
-import Projects from "../components/Project/Projects";
-import Persons from "../components/Person/Persons";
-import Institutions from "../components/Institution/Institutions";
-import Users from "../components/User/Users";
+import Projects from "../components/Projects/Projects";
+import Persons from "../components/Persons/Persons";
+import Institutions from "../components/Institutions/Institutions";
+import Users from "../components/Users/Users";
+import Table from "../components/Table/Table";
+import Person from "../components/Persons/Person/Person";
 
 const loadCurrentUserFromLocalStorage = () => {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_KEY))
@@ -35,10 +37,13 @@ const AppRouter = (props) => {
         <Router history={history}>
             <Switch>
                 <Route path="/login" exact component={Login}/>
-                <PrivateRoute path="/persons"  component={Persons}/>
-                <PrivateRoute path="/projects"  component={Projects}/>
+                <PrivateRoute path="/persons/:id" exact  component={Person}/>
+                <PrivateRoute path="/persons"   component={Persons}/>
+
+                <PrivateRoute path="/projects"   component={Projects}/>
                 <PrivateRoute path="/institutions"  component={Institutions}/>
                 <PrivateRoute path="/users"  component={Users}/>
+                <PrivateRoute path="/tables"  component={Table}/>
                 <PrivateRoute path="/" exact component={Dashboard}/>
 
                 {/*
