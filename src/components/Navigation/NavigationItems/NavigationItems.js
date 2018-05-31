@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import navigationItemsCss from './NavigationItems.css';
+import './NavigationItems.css';
 import NavigationItem from './NavigationItem/NavigationItem';
 import Button from '@material-ui/core/Button';
 import ExitToApp from '@material-ui/icons/ExitToApp';
@@ -50,7 +50,7 @@ class NavigationItems extends React.Component {
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
     return (
-      <ul className={navigationItemsCss.NavigationItems}>
+      <ul className="NavigationItems">
         <NavigationItem link="/" exact>
           Home
         </NavigationItem>
@@ -69,7 +69,7 @@ class NavigationItems extends React.Component {
                 </Button>
                      */}
 
-        <div>
+        <div className="ButtonContainer">
           <Button
             size="large"
             aria-owns={open ? 'menu-appbar' : null}
@@ -78,10 +78,8 @@ class NavigationItems extends React.Component {
             className={classes.button}
           >
             <AccountCircle />{' '}
-            <span className={navigationItemsCss.User}>
-              {this.props.user.username}
-            </span>
-            <b className={navigationItemsCss.Caret} />
+            <span className="User">{this.props.user.username}</span>
+            <b className="Caret" />
           </Button>
           <Menu
             id="menu-appbar"

@@ -11,7 +11,7 @@ import Icon from '@material-ui/core/Icon';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ExplorIcon from '@material-ui/icons/Explore';
 import Tooltip from '@material-ui/core/Tooltip';
-
+import 'react-table/react-table.css';
 import axios from '../../axios-infofauna';
 import cssPersons from './Persons.css';
 
