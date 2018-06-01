@@ -7,9 +7,6 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-import Icon from '@material-ui/core/Icon';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ExplorIcon from '@material-ui/icons/Explore';
 import Tooltip from '@material-ui/core/Tooltip';
 import "react-table/react-table.css";
 
@@ -209,43 +206,6 @@ class Persons extends Component {
                     Header: 'E-mail',
                     accessor: 'email',
                     maxWidth: 300
-                  }
-                ]
-              },
-              {
-                Header: 'Actions',
-                columns: [
-                  {
-                    Header: '',
-                    accessor: 'id',
-                    sortable: false,
-                    maxWidth: 120,
-                    Cell: row => (
-                      <div>
-                        <Tooltip id="tooltip-fab" title="Modifier la personne">
-                          <Button
-                            variant="fab"
-                            mini
-                            aria-label="edit"
-                            className={classes.buttonExtraSmall}
-                          >
-                            <Icon>edit_icon</Icon>
-                          </Button>
-                        </Tooltip>
-
-                        <Tooltip id="tooltip-fab" title="Supprimer la personne">
-                          <Button
-                            variant="fab"
-                            color="secondary"
-                            mini
-                            aria-label="delete"
-                            className={classes.buttonExtraSmall}
-                          >
-                            <DeleteIcon />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    )
                   }
                 ]
               }
