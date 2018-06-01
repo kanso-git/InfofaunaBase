@@ -6,8 +6,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-
-
+  margin-top: -60px;
 }
 
 .Button {
@@ -16,6 +15,10 @@
 .Button:hover {
   color: #40a4c8;
 }
+.ButtonContainer {
+  margin-left: -30px;
+}
+
 @media (min-width: 500px) {
   .NavigationItems {
     display: flex;
@@ -23,11 +26,15 @@
     align-items: flex-end;
     vertical-align: bottom;
     justify-content: flex-end;
+    margin-top: 0px;
+  }
 
+  .ButtonContainer {
+    margin-left: 0px;
   }
 }
 
-.User{
+.User {
   font-size: 14px;
   text-transform: lowercase;
   margin-left: 3px;
