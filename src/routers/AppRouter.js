@@ -15,6 +15,7 @@ import Institutions from "../components/Institutions/Institutions";
 import Users from "../components/Users/Users";
 import Table from "../components/Table/Table";
 import Person from "../components/Persons/Person/Person";
+import Project from "../components/Projects/Project/Project";
 
 const loadCurrentUserFromLocalStorage = () => {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_KEY))
@@ -37,10 +38,13 @@ const AppRouter = (props) => {
         <Router history={history}>
             <Switch>
                 <Route path="/login" exact component={Login}/>
+
                 <PrivateRoute path="/persons/:id" exact  component={Person}/>
                 <PrivateRoute path="/persons"   component={Persons}/>
 
+                <PrivateRoute path="/projects/:id" exact  component={Project}/>
                 <PrivateRoute path="/projects"   component={Projects}/>
+
                 <PrivateRoute path="/institutions"  component={Institutions}/>
                 <PrivateRoute path="/users"  component={Users}/>
                 <PrivateRoute path="/tables"  component={Table}/>

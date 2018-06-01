@@ -14,6 +14,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 import axios from '../../axios-infofauna';
 import cssProjects from './Projects.css'
+import {projectActions} from "../../store/actions";
+import {connect} from "react-redux";
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -55,6 +57,12 @@ class Projects extends Component {
         searchInstitutionName: ''
 
     };
+
+    handleOpen = (id) =>{
+        console.log(`handleOpen :: open the details of project with id:${id}`);
+        this.props.initiateFetchProject();
+        this.props.history.push('/projects/'+ id );
+    }
 
     handleFiltered = (key, e) => {
         const filtered = e.target.value;
@@ -154,21 +162,9 @@ class Projects extends Component {
                     <ReactTable
                         getTdProps={(state, rowInfo, column, instance) => {
                             return {
-                                onClick: (e, handleOriginal) => {
-                                    console.log("A Td Element was clicked!");
-                                    console.log("it produced this event:", e);
-                                    console.log("It was in this column:", column);
-                                    console.log("It was in this row:", rowInfo);
-                                    console.log("It was in this table instance:", instance);
-
-                                    // IMPORTANT! React-Table uses onClick internally to trigger
-                                    // events like expanding SubComponents and pivots.
-                                    // By default a custom 'onClick' handler will override this functionality.
-                                    // If you want to fire the original onClick handler, call the
-                                    // 'handleOriginal' function.
-                                    if (handleOriginal) {
-                                        handleOriginal();
-                                    }
+                                onClick: (e) => {
+                                    console.log( rowInfo.row._original.id);
+                                    this.handleOpen(rowInfo.row._original.id);
                                 }
                             };
                         }}
@@ -214,36 +210,7 @@ class Projects extends Component {
                                         maxWidth: 300
                                     }
                                 ]
-                            },
-                            {
-                                Header: "Actions",
-                                columns: [
-                                    {
-                                        Header: "",
-                                        accessor: "id",
-                                        sortable: false,
-                                        maxWidth: 120,
-                                        Cell: row => (
-                                            <div>
-                                                <Tooltip id="tooltip-fab" title="Modifier la personne">
-                                                    <Button variant="fab" mini aria-label="edit"
-                                                            className={classes.buttonExtraSmall}>
-                                                        <Icon>edit_icon</Icon>
-                                                    </Button>
-                                                </Tooltip>
-
-                                                <Tooltip id="tooltip-fab" title="Supprimer la personne">
-                                                    <Button variant="fab" color="secondary" mini aria-label="delete"
-                                                            className={classes.buttonExtraSmall}>
-                                                        <DeleteIcon/>
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        )
-                                    }
-                                ]
                             }
-
 
                         ]}
 
@@ -277,5 +244,5 @@ Projects.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Projects);
+export default connect(null,{...projectActions})(withStyles(styles)(Projects));
 

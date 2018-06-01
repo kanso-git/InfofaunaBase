@@ -152,8 +152,8 @@ class Persons extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onClick: (e) => {
-                  console.log('It was in this id:', rowInfo.row.id);
-                  this.handleOpen(rowInfo.row.id);
+                    console.log( rowInfo.row._original.id);
+                    this.handleOpen(rowInfo.row._original.id);
                 }
               };
             }}

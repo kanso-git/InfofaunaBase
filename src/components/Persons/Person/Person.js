@@ -139,6 +139,7 @@ class Person extends Component {
                                             checked={this.state.enableEditMode}
                                             onChange={this.handleEnableEditMode}
                                             value="enableEditMode"
+                                            color="primary"
                                         />
                                     }
                                     label="Enable edit mode"

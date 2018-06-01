@@ -41,6 +41,7 @@ const fetchPerson = (id) => async (dispatch, getState) => {
   }
 };
 
+
 export {
     initiateFetchPerson,
     fetchPerson

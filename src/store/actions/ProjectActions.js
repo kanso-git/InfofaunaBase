@@ -2,53 +2,73 @@ import axios from '../../axios-infofauna';
 import * as types from './Types';
 
 // actions generators
-
-const initiateFetchProjectsAction = () => ({
-    type: types.INITIATE_FETCH_PROJECTS
+const initiateFetchProjectAction = () => ({
+    type: types.INITIATE_FETCH_PROJECT
 });
 
-const listProjectsAction = payload => ({
-    type: types.LIST_PROJECTS,
+const fetchProjectAction = payload => ({
+    type: types.FETCH_PROJECT,
+    payload
+
+});
+
+const errorFecthingProjectAction = payload => ({
+    type: types.ERROR_FECTHING_PROJECT,
     payload
 });
 
-const errorLoadingListProjectsAction = payload => ({
-    type: types.ERROR_LOADING_LIST_PROJECTS,
-    payload
-});
 
+const fetchProjectsListAction = payload => ({
+    type: types.FETCH_PROJECTS_LIST,
+    payload
+
+});
 
 
 // axios
-const loadProjectsAxios = async (params) => {
-    //api/projects/?pageSize=20&page=1&orderBy=designation&sortOrder=asc
-
-    const reqParam = Object.key(params)
-        .map(k => `${k}=${params[k]}`).join('&')
-    console.log(`loadProjectsAxios :reqParam:${reqParam}`);
-    return axios.get(`/api/projects/?${reqParam}`);
+const fetchProjectAxios = async (id) => {
+    const url =`/api/projects/${id}`;
+    console.log(`fetchProjectAxios url:${url}`);
+    return axios.get(url);
 };
 
+
+const fetchProjectsListAxios = async () => {
+    const url =`/api/projects/list`;
+    console.log(`fetchProjectsListAxios url:${url}`);
+    return axios.get(url);
+};
 
 
 // actions
 
-const initiateFetchProjects = () => dispatch =>
-    dispatch(initiateFetchProjectsAction());
+const initiateFetchProject = () => dispatch =>
+    dispatch(initiateFetchProjectAction());
 
-const loadProjects = (param) => async (dispatch, getState) => {
+const fetchProject = (id) => async (dispatch, getState) => {
     try {
-        const projects = await loadProjectsAxios(param);
-        const projectsAction = listProjectsAction(projects.data);
-        dispatch(projectsAction);
+
+        const project = await fetchProjectAxios(id);
+        const projectAction = fetchProjectAction(project.data);
+        dispatch(projectAction);
     } catch (e) {
-        dispatch(errorLoadingListProjectsAction('error loading the orders'));
+        dispatch(errorFecthingProjectAction('error loading person detail'));
     }
 };
 
+const fetchProjectsList= () => async (dispatch, getState) => {
+    try {
 
+        const projectsList = await fetchProjectsListAxios();
+        const projectsListAction = fetchProjectsListAction(projectsList.data);
+        dispatch(projectsListAction);
+    } catch (e) {
+        dispatch(errorFecthingProjectAction('error loading person detail'));
+    }
+};
 
 export {
-    loadProjects,
-    initiateFetchProjects
+    initiateFetchProject,
+    fetchProject,
+    fetchProjectsList,
 };
