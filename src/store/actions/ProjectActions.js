@@ -52,16 +52,29 @@ const initiateFetchProject = () => dispatch =>
 
 const fetchProject = id => async (dispatch, getState) => {
   try {
-    const projectsList = await fetchProjectsListAxios();
-    const personsList = await fetchPersonsListAxios();
-    const institutionsList = await fetchInstitutionsListAxios();
+    let projectsList = getState().project.projectsList;
+    if (!projectsList) {
+      const projectsListAxios = await fetchProjectsListAxios();
+      projectsList = projectsListAxios.data;
+    }
+
+    let personsList = getState().project.personsList;
+    if (!personsList) {
+      const personsListAxios = await fetchPersonsListAxios();
+      personsList = personsListAxios.data;
+    }
+    let institutionsList = getState().project.personsList;
+    if (!institutionsList) {
+      const institutionsListAxios = await fetchInstitutionsListAxios();
+      institutionsList = institutionsListAxios.data;
+    }
 
     const project = await fetchProjectAxios(id);
     const projectAction = fetchProjectAction({
       data: project.data,
-      projectsList: projectsList.data,
-      institutionsList: institutionsList.data,
-      personsList: personsList.data
+      projectsList,
+      institutionsList,
+      personsList
     });
     dispatch(projectAction);
   } catch (e) {

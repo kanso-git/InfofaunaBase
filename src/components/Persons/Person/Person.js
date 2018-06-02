@@ -61,6 +61,13 @@ const styles = theme => ({
     position: 'absolute',
     bottom: theme.spacing.unit * 2,
     right: theme.spacing.unit * 3
+  },
+  backLink: {
+    color: '#3266cc',
+    textDecoration: 'none'
+  },
+  actualSite: {
+    color: '#777'
   }
 });
 
@@ -72,12 +79,17 @@ class Person extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
+    console.log(
+      '>>>>>>>>>>>>>>>>loadingProgress :' + this.state.loadingProgress
+    );
 
     if (
-      !this.props.person.data ||
-      (this.props.person.data != null && this.props.person.data.id != id)
+      !this.props.person.ongoingFetch &&
+      (!this.props.person.data ||
+        (this.props.person.data != null && this.props.person.data.id != id))
     ) {
-      this.setState(() => ({ loadingProgress: true }));
+      this.props.initiateFetchPerson();
+
       if (!this.props.thesaurus[types.REALM_COUNTRY]) {
         this.props.fetchThesaurus(types.REALM_COUNTRY);
       }
@@ -92,8 +104,6 @@ class Person extends Component {
       }
 
       this.props.fetchPerson(id);
-    } else {
-      this.setState(() => ({ loadingProgress: false }));
     }
   }
 
@@ -119,7 +129,7 @@ class Person extends Component {
       thesaurus
     } = this.props;
 
-    if (this.state.loadingProgress) {
+    if (this.props.person.ongoingFetch) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
@@ -142,7 +152,11 @@ class Person extends Component {
       <div className="PersonContainer">
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Détail personne
+            <NavLink to="/persons" className={classes.backLink}>
+              Personnes
+            </NavLink>{' '}
+            >
+            <span className={classes.actualSite}> Détail personne</span>
           </Typography>
 
           <div style={{ float: 'right' }}>

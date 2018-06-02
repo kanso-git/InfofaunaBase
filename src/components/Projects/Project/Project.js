@@ -21,11 +21,10 @@ import TextField from '@material-ui/core/TextField';
 import moment from '../../../moment-local';
 import './Project.css';
 import withErrorHandler from '../../../components/withErrorHandler/withErrorHandler';
-import Spinner from '../../../components/UI/Spinner/Spinner';
 import axios from '../../../axios-infofauna';
 import { projectActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
-import { NavLink, Redirect } from 'react-router-dom';
+import { NavLink, Redirect, BrowserRouter } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 
 import MenuItem from '@material-ui/core/MenuItem';
@@ -302,23 +301,30 @@ const styles = theme => ({
   checked: {},
   progress: {
     margin: theme.spacing.unit * 2
+  },
+  backLink: {
+    color: '#3266cc',
+    textDecoration: 'none'
+  },
+  actualSite: {
+    color: '#777'
   }
 });
 
 class Project extends Component {
   state = {
-    loadingProgress: false,
-    enableEditMode: true
+    enableEditMode: false
   };
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    console.log(this.props);
+
     if (
-      !this.props.project.data ||
-      (this.props.project.data != null && this.props.project.data.id != id)
+      !this.props.project.ongoingFetch &&
+      (!this.props.project.data ||
+        (this.props.project.data != null && this.props.project.data.id != id))
     ) {
-      this.setState(() => ({ loadingProgress: true }));
+      this.props.initiateFetchProject();
       if (!this.props.thesaurus[types.REALM_PROJETTYPE]) {
         this.props.fetchThesaurus(types.REALM_PROJETTYPE);
       }
@@ -329,9 +335,8 @@ class Project extends Component {
         this.props.fetchThesaurus(types.REALM_PROJETLIMA);
       }
 
+      console.log('calling  fetchProject >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
       this.props.fetchProject(id);
-    } else {
-      this.setState(() => ({ loadingProgress: false }));
     }
   }
 
@@ -396,12 +401,12 @@ class Project extends Component {
       thesaurus
     } = this.props;
 
-    if (this.state.loadingProgress) {
+    if (this.props.project.ongoingFetch) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
             <Typography variant="headline" component="h3">
-              chrargement du projet
+              Chrargement du projet
             </Typography>
             <br />
             <br />
@@ -419,7 +424,11 @@ class Project extends Component {
       <div className="ProjectContainer">
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Détail du projet
+            <NavLink to="/projects" className={classes.backLink}>
+              Projects
+            </NavLink>{' '}
+            >
+            <span className={classes.actualSite}> Détail du projet</span>
           </Typography>
 
           <div style={{ float: 'right' }}>
@@ -557,8 +566,11 @@ class Project extends Component {
                 />
               </FormControl>
 
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="codeCh">URL du projet</InputLabel>
+              <FormControl
+                className={classes.formControl}
+                error={touched.url && errors.url ? true : false}
+              >
+                <InputLabel htmlFor="url">URL du projet</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="url"
@@ -569,6 +581,10 @@ class Project extends Component {
                   onBlur={handleBlur}
                   value={values.url}
                 />
+                {touched.url &&
+                  errors.url && (
+                    <FormHelperText id="url-text">{errors.url}</FormHelperText>
+                  )}
               </FormControl>
 
               <FormControl className={classes.formControl}>
@@ -589,6 +605,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
+                  <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETTYPE] ? (
                     thesaurus[types.REALM_PROJETTYPE].map(option => (
                       <option key={option.id} value={option.code}>
@@ -619,6 +636,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
+                  <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETORIG] ? (
                     thesaurus[types.REALM_PROJETORIG].map(option => (
                       <option key={option.id} value={option.code}>
@@ -649,6 +667,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
+                  <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETLIMA] ? (
                     thesaurus[types.REALM_PROJETLIMA].map(option => (
                       <option key={option.id} value={option.code}>
@@ -788,6 +807,7 @@ class Project extends Component {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 value={values.description}
+                style={{ marginLeft: 10 }}
                 fullWidth
                 margin="normal"
               />
@@ -899,10 +919,12 @@ class Project extends Component {
 
             <Paper className={classes.root} elevation={1}>
               <Typography component="h4">Organisation mandataire </Typography>
+
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandatorylInstitutionId">
                   Nom de l'organisation mandataire
                 </InputLabel>
+
                 <Input
                   name="mandatorylInstitutionId"
                   inputComponent={SelectWrapped}
@@ -914,7 +936,7 @@ class Project extends Component {
                   }
                   onBlur={handleBlur}
                   placeholder="Rechercher organisation mandataire"
-                  id="react-select-single-mandatoryInstitution"
+                  id="mandatorylInstitutionId"
                   inputProps={{
                     classes,
                     name: 'react-select-single',
@@ -940,7 +962,7 @@ class Project extends Component {
                   }
                   onBlur={handleBlur}
                   placeholder="Rechercher administrateur / initiateur"
-                  id="react-select-single-mandatoryInstitutionPerson"
+                  id=""
                   inputProps={{
                     classes,
                     name: 'react-select-single',
@@ -1045,7 +1067,7 @@ const ProjectForm = withFormik({
       projectProjectId:
         project.data && project.data.projectProjectId
           ? project.data.projectProjectId
-          : '',
+          : -1,
       voluntaryWork:
         project.data && project.data.voluntaryWork
           ? project.data.voluntaryWork
@@ -1058,15 +1080,15 @@ const ProjectForm = withFormik({
       projectTypeId:
         project.data && project.data.projectTypeId
           ? project.data.projectTypeId
-          : '',
+          : -1,
       projectOriginId:
         project.data && project.data.projectOriginId
           ? project.data.projectOriginId
-          : '',
+          : -1,
       projectLimaId:
         project.data && project.data.projectLimaId
           ? project.data.projectLimaId
-          : '',
+          : -1,
       debutJour:
         project.data && project.data.debutJour ? project.data.debutJour : '',
       debutMois:
@@ -1085,22 +1107,22 @@ const ProjectForm = withFormik({
       principalInstitutionId:
         project.data && project.data.principalInstitutionId
           ? project.data.principalInstitutionId
-          : '',
+          : -1,
 
       principalInstitutionPersonId:
         project.data && project.data.principalInstitutionPersonId
           ? project.data.principalInstitutionPersonId
-          : '',
+          : -1,
 
       mandataryInstitutionId:
         project.data && project.data.mandataryInstitutionId
           ? project.data.mandataryInstitutionId
-          : '',
+          : -1,
 
       mandataryInstitutionPersonId:
         project.data && project.data.mandataryInstitutionPersonId
           ? project.data.mandataryInstitutionPersonId
-          : '',
+          : -1,
 
       principalInstitutionName:
         project.data && project.data.principalInstitutionName
@@ -1137,15 +1159,9 @@ const ProjectForm = withFormik({
   },
   isInitialValid: true,
   validationSchema: object().shape({
-    firstName: string().required('firstName is required ..'),
-    lastName: string().required('lastName is required ..'),
-    genderId: string().required('gender is required ..'),
-    languageId: string().required('language is required ..'),
-    countryId: string().required('country is required ..'),
-    proPhone: string().min(10, 'Phone must be 10 or longer'),
-    mobilePhone: string().min(10, 'Phone must be 10 or longer'),
-    privatePhone: string().min(10, 'Phone must be 10 or longer'),
-    email: string().email('Email is not valid !')
+    code: string().required('Code info fauna is required ..'),
+    designation: string().required('Projet name  is required ..'),
+    url: string().url('url is not valide')
   })
 })(Project);
 
