@@ -8,12 +8,12 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
-import "react-table/react-table.css";
+import 'react-table/react-table.css';
 
 import axios from '../../axios-infofauna';
 import cssPersons from './Persons.css';
-import {personActions} from '../../store/actions'
-import {connect} from "react-redux";
+import { personActions } from '../../store/actions';
+import { connect } from 'react-redux';
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -53,11 +53,10 @@ class Persons extends Component {
     filtered: ''
   };
 
-  handleOpen = (id) =>{
-      console.log(`handleOpen :: open the details of person with id:${id}`);
-      this.props.initiateFetchPerson();
-      this.props.history.push('/persons/'+ id );
-  }
+  handleOpen = id => {
+    console.log(`handleOpen :: open the details of person with id:${id}`);
+    this.props.history.push('/persons/' + id);
+  };
   handleFiltered = async e => {
     const filtered = e.target.value;
     const updatedState = { ...this.state, filtered, page: 0 };
@@ -84,33 +83,31 @@ class Persons extends Component {
   };
   //  //api/projects/?pageSize=20&page=1&orderBy=designation&sortOrder=asc
   requestData = async reqParam => {
-      const res = await axios.get(`/api/persons/?${reqParam}`);
-      return res;
+    const res = await axios.get(`/api/persons/?${reqParam}`);
+    return res;
   };
   fetchData = async (state, instance) => {
-        const requestParams = this.createRequestParams(
-          state.pageSize,
-          state.page,
-          state.sorted,
-          state.filtered ? state.filtered : ''
-        );
+    const requestParams = this.createRequestParams(
+      state.pageSize,
+      state.page,
+      state.sorted,
+      state.filtered ? state.filtered : ''
+    );
 
-        this.setState(() => ({
-            loading: true,
-            sorted: state.sorted,
-            pageSize: state.pageSize,
-            page: state.page
-        }));
-        // Request the data however you want.  Here, we'll use our mocked service we created earlier
-        const res = await this.requestData(requestParams);
+    this.setState(() => ({
+      loading: true,
+      sorted: state.sorted,
+      pageSize: state.pageSize,
+      page: state.page
+    }));
+    // Request the data however you want.  Here, we'll use our mocked service we created earlier
+    const res = await this.requestData(requestParams);
 
-        this.setState(() => ({
-            data: res.data.rows,
-            pages: Math.ceil(res.data.total / state.pageSize),
-            loading: false
-        }));
-
-
+    this.setState(() => ({
+      data: res.data.rows,
+      pages: Math.ceil(res.data.total / state.pageSize),
+      loading: false
+    }));
   };
 
   render() {
@@ -151,9 +148,9 @@ class Persons extends Component {
           <ReactTable
             getTdProps={(state, rowInfo, column, instance) => {
               return {
-                onClick: (e) => {
-                    console.log( rowInfo.row._original.id);
-                    this.handleOpen(rowInfo.row._original.id);
+                onClick: e => {
+                  console.log(rowInfo.row._original.id);
+                  this.handleOpen(rowInfo.row._original.id);
                 }
               };
             }}
@@ -236,5 +233,4 @@ Persons.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-
-export default connect(null,{...personActions})(withStyles(styles)(Persons));
+export default connect(null, { ...personActions })(withStyles(styles)(Persons));
