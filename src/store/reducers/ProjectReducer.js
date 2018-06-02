@@ -16,6 +16,8 @@ const projectReducer = (state = initialState, action) => {
         ...state,
         data: action.payload.data,
         projectsList: action.payload.projectsList,
+        institutionsList: action.payload.institutionsList,
+        personsList: action.payload.personsList,
         error: null
       };
     case types.FETCH_PROJECTS_LIST:

@@ -42,6 +42,10 @@ import MaskedInput from 'react-text-mask';
 import NumberFormat from 'react-number-format';
 
 let suggestionsProject = [];
+let suggestionsPrincipalInstitution = [];
+let suggestionsPrincipalInstitutionPerson = [];
+let suggestionsMandatoryInstitution = [];
+let suggestionsMandatoryInstitutionPerson = [];
 
 class Option extends React.Component {
   handleClick = event => {
@@ -344,6 +348,38 @@ class Project extends Component {
         value: suggestion.id,
         label: suggestion.code
       }));
+    }
+
+    if (this.props.project.personsList) {
+      suggestionsPrincipalInstitutionPerson = this.props.project.personsList.map(
+        suggestion => ({
+          value: suggestion.id,
+          label: suggestion.name
+        })
+      );
+
+      suggestionsMandatoryInstitutionPerson = this.props.project.personsList.map(
+        suggestion => ({
+          value: suggestion.id,
+          label: suggestion.name
+        })
+      );
+    }
+
+    if (this.props.project.institutionsList) {
+      suggestionsPrincipalInstitution = this.props.project.institutionsList.map(
+        suggestion => ({
+          value: suggestion.id,
+          label: suggestion.name
+        })
+      );
+
+      suggestionsMandatoryInstitution = this.props.project.institutionsList.map(
+        suggestion => ({
+          value: suggestion.id,
+          label: suggestion.name
+        })
+      );
     }
 
     const { classes } = this.props;
@@ -757,6 +793,213 @@ class Project extends Component {
               />
             </Paper>
 
+            <Paper className={classes.root} elevation={1}>
+              <Typography component="h4">Organisation mandante</Typography>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="principalInstitutionId">
+                  Nom de l'organisation mandante
+                </InputLabel>
+                <Input
+                  name="principalInstitutionId"
+                  inputComponent={SelectWrapped}
+                  value={values.principalInstitutionId}
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={b =>
+                    this.props.setFieldValue('principalInstitutionId', b)
+                  }
+                  onBlur={handleBlur}
+                  placeholder="Rechercher organisation mandante"
+                  id="react-select-single-principalInstitution"
+                  inputProps={{
+                    classes,
+                    name: 'react-select-single',
+                    instanceId: 'react-select-single',
+                    simpleValue: true,
+                    options: suggestionsPrincipalInstitution
+                  }}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="principalInstitutionPersonId">
+                  Personne (administrateur / initiateur)
+                </InputLabel>
+                <Input
+                  name="principalInstitutionPersonId"
+                  inputComponent={SelectWrapped}
+                  value={values.principalInstitutionPersonId}
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={b =>
+                    this.props.setFieldValue('principalInstitutionPersonId', b)
+                  }
+                  onBlur={handleBlur}
+                  placeholder="Rechercher administrateur / initiateur"
+                  id="react-select-single-principalInstitutionPerson"
+                  inputProps={{
+                    classes,
+                    name: 'react-select-single',
+                    instanceId: 'react-select-single',
+                    simpleValue: true,
+                    options: suggestionsPrincipalInstitutionPerson
+                  }}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="principalInstitutionName">
+                  Nom au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="principalInstitutionName"
+                  name="principalInstitutionName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.principalInstitutionName}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="principalInstitutionRespLastName">
+                  Nom administrateur au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="principalInstitutionRespLastName"
+                  name="principalInstitutionRespLastName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.principalInstitutionRespLastName}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="principalInstitutionRespFirstName">
+                  Prénom administrateur au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="principalInstitutionRespFirstName"
+                  name="principalInstitutionRespFirstName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.principalInstitutionRespFirstName}
+                />
+              </FormControl>
+            </Paper>
+
+            <Paper className={classes.root} elevation={1}>
+              <Typography component="h4">Organisation mandataire </Typography>
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mandatorylInstitutionId">
+                  Nom de l'organisation mandataire
+                </InputLabel>
+                <Input
+                  name="mandatorylInstitutionId"
+                  inputComponent={SelectWrapped}
+                  value={values.mandataryInstitutionId}
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={b =>
+                    this.props.setFieldValue('mandataryInstitutionId', b)
+                  }
+                  onBlur={handleBlur}
+                  placeholder="Rechercher organisation mandataire"
+                  id="react-select-single-mandatoryInstitution"
+                  inputProps={{
+                    classes,
+                    name: 'react-select-single',
+                    instanceId: 'react-select-single',
+                    simpleValue: true,
+                    options: suggestionsMandatoryInstitution
+                  }}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mandataryInstitutionPersonId">
+                  Personne (administrateur / initiateur)
+                </InputLabel>
+                <Input
+                  name="mandataryInstitutionPersonId"
+                  inputComponent={SelectWrapped}
+                  value={values.mandataryInstitutionPersonId}
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={b =>
+                    this.props.setFieldValue('mandataryInstitutionPersonId', b)
+                  }
+                  onBlur={handleBlur}
+                  placeholder="Rechercher administrateur / initiateur"
+                  id="react-select-single-mandatoryInstitutionPerson"
+                  inputProps={{
+                    classes,
+                    name: 'react-select-single',
+                    instanceId: 'react-select-single',
+                    simpleValue: true,
+                    options: suggestionsMandatoryInstitutionPerson
+                  }}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mandataryInstitutionName">
+                  Nom au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="mandataryInstitutionName"
+                  name="mandataryInstitutionName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.mandataryInstitutionName}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mandataryInstitutionRespLastName">
+                  Nom administrateur au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="mandataryInstitutionRespLastName"
+                  name="mandataryInstitutionRespLastName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.mandataryInstitutionRespLastName}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mandataryInstitutionRespFirstName">
+                  Prénom administrateur au début du projet (si différente)
+                </InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="mandataryInstitutionRespFirstName"
+                  name="mandataryInstitutionRespFirstName"
+                  className={classes.textField}
+                  style={{ width: 400 }}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.mandataryInstitutionRespFirstName}
+                />
+              </FormControl>
+            </Paper>
+
             <br />
 
             {this.state.enableEditMode && (
@@ -835,7 +1078,55 @@ const ProjectForm = withFormik({
       finAnnee:
         project.data && project.data.finAnnee ? project.data.finAnnee : '',
       description:
-        project.data && project.data.description ? project.data.description : ''
+        project.data && project.data.description
+          ? project.data.description
+          : '',
+
+      principalInstitutionId:
+        project.data && project.data.principalInstitutionId
+          ? project.data.principalInstitutionId
+          : '',
+
+      principalInstitutionPersonId:
+        project.data && project.data.principalInstitutionPersonId
+          ? project.data.principalInstitutionPersonId
+          : '',
+
+      mandataryInstitutionId:
+        project.data && project.data.mandataryInstitutionId
+          ? project.data.mandataryInstitutionId
+          : '',
+
+      mandataryInstitutionPersonId:
+        project.data && project.data.mandataryInstitutionPersonId
+          ? project.data.mandataryInstitutionPersonId
+          : '',
+
+      principalInstitutionName:
+        project.data && project.data.principalInstitutionName
+          ? project.data.principalInstitutionName
+          : '',
+      principalInstitutionRespFirstName:
+        project.data && project.data.principalInstitutionRespFirstName
+          ? project.data.principalInstitutionRespFirstName
+          : '',
+      principalInstitutionRespLastName:
+        project.data && project.data.principalInstitutionRespLastName
+          ? project.data.principalInstitutionRespLastName
+          : '',
+
+      mandataryInstitutionName:
+        project.data && project.data.mandataryInstitutionName
+          ? project.data.mandataryInstitutionName
+          : '',
+      mandataryInstitutionRespFirstName:
+        project.data && project.data.mandataryInstitutionRespFirstName
+          ? project.data.mandataryInstitutionRespFirstName
+          : '',
+      mandataryInstitutionRespLastName:
+        project.data && project.data.mandataryInstitutionRespLastName
+          ? project.data.mandataryInstitutionRespLastName
+          : ''
     };
   },
   handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {

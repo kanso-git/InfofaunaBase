@@ -34,6 +34,17 @@ const fetchProjectsListAxios = async () => {
   return axios.get(url);
 };
 
+const fetchPersonsListAxios = async () => {
+  const url = `/api/persons/list`;
+  console.log(`fetchPersonsListAxios url:${url}`);
+  return axios.get(url);
+};
+
+const fetchInstitutionsListAxios = async () => {
+  const url = `/api/institutions/list`;
+  console.log(`fetchInstitutionsListAxios url:${url}`);
+  return axios.get(url);
+};
 // actions
 
 const initiateFetchProject = () => dispatch =>
@@ -42,10 +53,15 @@ const initiateFetchProject = () => dispatch =>
 const fetchProject = id => async (dispatch, getState) => {
   try {
     const projectsList = await fetchProjectsListAxios();
+    const personsList = await fetchPersonsListAxios();
+    const institutionsList = await fetchInstitutionsListAxios();
+
     const project = await fetchProjectAxios(id);
     const projectAction = fetchProjectAction({
       data: project.data,
-      projectsList: projectsList.data
+      projectsList: projectsList.data,
+      institutionsList: institutionsList.data,
+      personsList: personsList.data
     });
     dispatch(projectAction);
   } catch (e) {
