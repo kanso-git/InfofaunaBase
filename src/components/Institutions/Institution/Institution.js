@@ -19,15 +19,195 @@ import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
 import moment from '../../../moment-local';
-import './Person.css';
+import './Institution.css';
 import withErrorHandler from '../../../components/withErrorHandler/withErrorHandler';
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import axios from '../../../axios-infofauna';
-import { personActions, thesaurusActions } from '../../../store/actions';
+import { institutionActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
 import { NavLink, Redirect } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
+
+import MenuItem from '@material-ui/core/MenuItem';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CancelIcon from '@material-ui/icons/Cancel';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+import ClearIcon from '@material-ui/icons/Clear';
+import Chip from '@material-ui/core/Chip';
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
+
+let suggestionsPerson = [];
+
+class Option extends React.Component {
+  handleClick = event => {
+    this.props.onSelect(this.props.option, event);
+  };
+
+  render() {
+    const { children, isFocused, isSelected, onFocus } = this.props;
+
+    return (
+      <MenuItem
+        onFocus={onFocus}
+        selected={isFocused}
+        onClick={this.handleClick}
+        component="div"
+        style={{
+          fontWeight: isSelected ? 500 : 400
+        }}
+      >
+        {children}
+      </MenuItem>
+    );
+  }
+}
+
+function SelectWrapped(props) {
+  const { classes, ...other } = props;
+
+  return (
+    <Select
+      optionComponent={Option}
+      noResultsText={<Typography>{'No results found'}</Typography>}
+      arrowRenderer={arrowProps => {
+        return arrowProps.isOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />;
+      }}
+      clearRenderer={() => <ClearIcon />}
+      valueComponent={valueProps => {
+        const { value, children, onRemove } = valueProps;
+
+        const onDelete = event => {
+          event.preventDefault();
+          event.stopPropagation();
+          onRemove(value);
+        };
+
+        if (onRemove) {
+          return (
+            <Chip
+              tabIndex={-1}
+              label={children}
+              className={classes.chip}
+              deleteIcon={<CancelIcon onTouchEnd={onDelete} />}
+              onDelete={onDelete}
+            />
+          );
+        }
+
+        return <div className="Select-value">{children}</div>;
+      }}
+      {...other}
+    />
+  );
+}
+const ITEM_HEIGHT = 48;
 const styles = theme => ({
+  root: {
+    flexGrow: 1,
+    height: 250
+  },
+  chip: {
+    margin: theme.spacing.unit / 4
+  },
+  // We had to use a lot of global selectors in order to style react-select.
+  // We are waiting on https://github.com/JedWatson/react-select/issues/1679
+  // to provide a much better implementation.
+  // Also, we had to reset the default style injected by the library.
+  '@global': {
+    '.Select-control': {
+      display: 'flex',
+      alignItems: 'center',
+      border: 0,
+      height: 'auto',
+      background: 'transparent',
+      '&:hover': {
+        boxShadow: 'none'
+      }
+    },
+    '.Select-multi-value-wrapper': {
+      flexGrow: 1,
+      display: 'flex',
+      flexWrap: 'wrap'
+    },
+    '.Select--multi .Select-input': {
+      margin: 0
+    },
+    '.Select.has-value.is-clearable.Select--single > .Select-control .Select-value': {
+      padding: 0
+    },
+    '.Select-noresults': {
+      padding: theme.spacing.unit * 2
+    },
+    '.Select-input': {
+      display: 'inline-flex !important',
+      padding: 0,
+      height: 'auto'
+    },
+    '.Select-input input': {
+      background: 'transparent',
+      border: 0,
+      padding: 0,
+      cursor: 'default',
+      display: 'inline-block',
+      fontFamily: 'inherit',
+      fontSize: 'inherit',
+      margin: 0,
+      outline: 0
+    },
+    '.Select-placeholder, .Select--single .Select-value': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      alignItems: 'center',
+      fontFamily: theme.typography.fontFamily,
+      fontSize: theme.typography.pxToRem(16),
+      padding: 0
+    },
+    '.Select-placeholder': {
+      opacity: 0.42,
+      color: theme.palette.common.black
+    },
+    '.Select-menu-outer': {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: theme.shadows[2],
+      position: 'absolute',
+      left: 0,
+      top: `calc(100% + ${theme.spacing.unit}px)`,
+      width: '100%',
+      zIndex: 2,
+      maxHeight: ITEM_HEIGHT * 4.5
+    },
+    '.Select.is-focused:not(.is-open) > .Select-control': {
+      boxShadow: 'none'
+    },
+    '.Select-menu': {
+      maxHeight: ITEM_HEIGHT * 4.5,
+      overflowY: 'auto'
+    },
+    '.Select-menu div': {
+      boxSizing: 'content-box'
+    },
+    '.Select-arrow-zone, .Select-clear-zone': {
+      color: theme.palette.action.active,
+      cursor: 'pointer',
+      height: 21,
+      width: 21,
+      zIndex: 1
+    },
+    // Only for screen readers. We can't use display none.
+    '.Select-aria-only': {
+      position: 'absolute',
+      overflow: 'hidden',
+      clip: 'rect(0 0 0 0)',
+      height: 1,
+      width: 1,
+      margin: -1
+    }
+  },
   container: {
     display: 'flex',
     flexWrap: 'wrap'
@@ -71,7 +251,7 @@ const styles = theme => ({
   }
 });
 
-class Person extends Component {
+class Institution extends Component {
   state = {
     loadingProgress: false,
     enableEditMode: false
@@ -84,26 +264,21 @@ class Person extends Component {
     );
 
     if (
-      !this.props.person.ongoingFetch &&
-      (!this.props.person.data ||
-        (this.props.person.data != null && this.props.person.data.id != id))
+      !this.props.institution.ongoingFetch &&
+      (!this.props.institution.data ||
+        (this.props.institution.data != null &&
+          this.props.institution.data.id != id))
     ) {
-      this.props.initiateFetchPerson();
+      this.props.initiateFetchInstitution();
 
       if (!this.props.thesaurus[types.REALM_COUNTRY]) {
         this.props.fetchThesaurus(types.REALM_COUNTRY);
       }
-      if (!this.props.thesaurus[types.REALM_GENDER]) {
-        this.props.fetchThesaurus(types.REALM_GENDER);
-      }
-      if (!this.props.thesaurus[types.REALM_TITLE]) {
-        this.props.fetchThesaurus(types.REALM_TITLE);
-      }
-      if (!this.props.thesaurus[types.REALM_LANGUAGE]) {
-        this.props.fetchThesaurus(types.REALM_LANGUAGE);
+      if (!this.props.thesaurus[types.REALM_FUNCTION]) {
+        this.props.fetchThesaurus(types.REALM_FUNCTION);
       }
 
-      this.props.fetchPerson(id);
+      this.props.fetchInstitution(id);
     }
   }
 
@@ -115,6 +290,14 @@ class Person extends Component {
   };
 
   render() {
+    if (this.props.institution.personsList) {
+      suggestionsPerson = this.props.institution.personsList.map(
+        suggestion => ({
+          value: suggestion.id,
+          label: suggestion.name
+        })
+      );
+    }
     const { classes } = this.props;
     const {
       values,
@@ -129,12 +312,12 @@ class Person extends Component {
       thesaurus
     } = this.props;
 
-    if (this.props.person.ongoingFetch) {
+    if (this.props.institution.ongoingFetch) {
       return (
-        <div className="ProjectContainer">
+        <div className="InstitutionContainer">
           <Paper className={classes.root} elevation={4}>
             <Typography variant="headline" component="h3">
-              chrargement personne ...
+              Chrargement institution ...
             </Typography>
             <br />
             <br />
@@ -149,18 +332,18 @@ class Person extends Component {
     }
 
     return (
-      <div className="PersonContainer">
+      <div className="InstitutionContainer">
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
             <NavLink to="/persons" className={classes.backLink}>
-              Personnes
+              Institutions
             </NavLink>{' '}
             >
-            <span className={classes.actualSite}> Détail personne</span>
+            <span className={classes.actualSite}> Détail de l'instutition</span>
           </Typography>
 
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+            <Tooltip id="tooltip-fab" title="enable edit">
               <FormControlLabel
                 control={
                   <Switch
@@ -178,167 +361,58 @@ class Person extends Component {
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Information personnelle</Typography>
+              <Typography component="p">Nom et abbréviation</Typography>
 
               <FormControl
                 className={classes.formControl}
-                error={touched.title && errors.title ? true : false}
+                error={touched.acronym && errors.acronym ? true : false}
               >
-                <TextField
-                  disabled={!this.state.enableEditMode}
-                  id="select-title-native"
-                  select
-                  label="Titre académique"
-                  name="title"
-                  className={classes.textField}
-                  style={{ width: 150 }}
-                  value={values.title}
-                  onChange={handleChange}
-                  SelectProps={{
-                    native: true,
-                    MenuProps: {
-                      className: classes.menu
-                    }
-                  }}
-                  margin="normal"
-                >
-                  <option value="-1"> </option>
-                  {thesaurus[types.REALM_TITLE] &&
-                    thesaurus[types.REALM_TITLE].map(option => (
-                      <option key={option.id} value={option.code}>
-                        {option.designation}
-                      </option>
-                    ))}
-                </TextField>
-              </FormControl>
-
-              <FormControl
-                className={classes.formControl}
-                error={touched.firstName && errors.firstName ? true : false}
-              >
-                <InputLabel htmlFor="firstName">*Prénom</InputLabel>
+                <InputLabel htmlFor="acronym">*Abbréviation</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
-                  id="firstName"
+                  id="acronym"
                   type="input"
-                  name="firstName"
+                  name="acronym"
                   className={classes.textField}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  value={values.firstName}
+                  value={values.acronym}
                 />
-                {touched.firstName &&
-                  errors.firstName && (
-                    <FormHelperText id="firstName-text">
-                      {errors.firstName}
+                {touched.acronym &&
+                  errors.acronym && (
+                    <FormHelperText id="acronym-text">
+                      {errors.acronym}
                     </FormHelperText>
                   )}
               </FormControl>
 
               <FormControl
                 className={classes.formControl}
-                error={touched.lastName && errors.lastName ? true : false}
+                error={touched.name && errors.name ? true : false}
               >
-                <InputLabel htmlFor="lastName">*Nom</InputLabel>
+                <InputLabel htmlFor="name">*Nom</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
-                  id="lastName"
+                  id="name"
                   type="input"
-                  name="lastName"
+                  name="name"
                   className={classes.textField}
+                  style={{ width: 400 }}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  value={values.lastName}
+                  value={values.name}
                 />
-                {touched.lastName &&
-                  errors.lastName && (
-                    <FormHelperText id="firstName-text">
-                      {errors.lastName}
+                {touched.name &&
+                  errors.name && (
+                    <FormHelperText id="name-text">
+                      {errors.name}
                     </FormHelperText>
                   )}
-              </FormControl>
-
-              <FormControl className={classes.formControl}>
-                <TextField
-                  disabled={!this.state.enableEditMode}
-                  id="select-gender-native"
-                  name="genderId"
-                  select
-                  label="*Genre"
-                  className={classes.textField}
-                  style={{ width: 150 }}
-                  value={values.genderId}
-                  onChange={handleChange}
-                  SelectProps={{
-                    native: true,
-                    MenuProps: {
-                      className: classes.menu
-                    }
-                  }}
-                  margin="normal"
-                >
-                  {thesaurus[types.REALM_GENDER] ? (
-                    thesaurus[types.REALM_GENDER].map(option => (
-                      <option key={option.id} value={option.code}>
-                        {option.designation}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="-1" />
-                  )}
-                </TextField>
-              </FormControl>
-
-              <FormControl className={classes.formControl}>
-                <TextField
-                  disabled={!this.state.enableEditMode}
-                  id="select-language-native"
-                  name="languageId"
-                  select
-                  label="*Langue"
-                  className={classes.textField}
-                  style={{ width: 150 }}
-                  value={values.languageId}
-                  onChange={handleChange}
-                  SelectProps={{
-                    native: true,
-                    MenuProps: {
-                      className: classes.menu
-                    }
-                  }}
-                  margin="normal"
-                >
-                  {thesaurus[types.REALM_LANGUAGE] ? (
-                    thesaurus[types.REALM_LANGUAGE].map(option => (
-                      <option key={option.id} value={option.code}>
-                        {option.designation}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="-1" />
-                  )}
-                </TextField>
-              </FormControl>
-
-              <FormControl className={classes.formControl}>
-                <TextField
-                  disabled={!this.state.enableEditMode}
-                  id="date"
-                  label="Birthday"
-                  name="dateOfBirth"
-                  type="date"
-                  onChange={handleChange}
-                  className={classes.textField}
-                  value={values.dateOfBirth}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
-                />
               </FormControl>
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="h4">Adresse</Typography>
+              <Typography component="h4">Adresse et contact</Typography>
 
               <FormControl
                 className={classes.formControl}
@@ -433,66 +507,104 @@ class Person extends Component {
                   )}
                 </TextField>
               </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="phone">Téléphone</InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="phone"
+                  type="input"
+                  name="phone"
+                  className={classes.textField}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.phone}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="mobilePhone">Fax</InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="fax"
+                  type="input"
+                  name="fax"
+                  className={classes.textField}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.fax}
+                />
+              </FormControl>
+
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="url">Url</InputLabel>
+                <Input
+                  disabled={!this.state.enableEditMode}
+                  id="url"
+                  type="input"
+                  name="url"
+                  className={classes.textField}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.url}
+                />
+              </FormControl>
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Information de contact</Typography>
+              <Typography component="p">Personne responsable</Typography>
+
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="proPhone">
-                  Téléphone professionnel
-                </InputLabel>
+                <InputLabel htmlFor="personInChargeId">*Personne</InputLabel>
                 <Input
-                  disabled={!this.state.enableEditMode}
-                  id="proPhone"
-                  type="input"
-                  name="proPhone"
+                  name="personInChargeId"
+                  inputComponent={SelectWrapped}
+                  value={values.personInChargeId}
                   className={classes.textField}
-                  onChange={handleChange}
+                  onChange={b =>
+                    this.props.setFieldValue('personInChargeId', b)
+                  }
                   onBlur={handleBlur}
-                  value={values.proPhone}
+                  placeholder="Search person In ChargeId"
+                  id="react-select-single"
+                  inputProps={{
+                    classes,
+                    name: 'react-select-single',
+                    instanceId: 'react-select-single',
+                    simpleValue: true,
+                    options: suggestionsPerson
+                  }}
                 />
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="mobilePhone">Téléphone mobile</InputLabel>
-                <Input
+                <TextField
                   disabled={!this.state.enableEditMode}
-                  id="mobilePhone"
-                  type="input"
-                  name="mobilePhone"
+                  id="select-personInChargeFunction-native"
+                  name="personInChargeFunctionId"
+                  select
+                  label="*Fonction dans l'institution"
                   className={classes.textField}
+                  value={values.personInChargeFunctionId}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.mobilePhone}
-                />
-              </FormControl>
-
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="privatePhone">Téléphone privé</InputLabel>
-                <Input
-                  disabled={!this.state.enableEditMode}
-                  id="privatePhone"
-                  type="input"
-                  name="privatePhone"
-                  className={classes.textField}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.privatePhone}
-                />
-              </FormControl>
-
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="email">E-mail</InputLabel>
-                <Input
-                  disabled={!this.state.enableEditMode}
-                  id="email"
-                  type="email"
-                  name="email"
-                  className={classes.textField}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.email}
-                />
+                  SelectProps={{
+                    native: true,
+                    MenuProps: {
+                      className: classes.menu
+                    }
+                  }}
+                  margin="normal"
+                >
+                  {thesaurus[types.REALM_FUNCTION] ? (
+                    thesaurus[types.REALM_FUNCTION].map(option => (
+                      <option key={option.id} value={option.code}>
+                        {option.designation}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="-1" />
+                  )}
+                </TextField>
               </FormControl>
             </Paper>
 
@@ -528,34 +640,53 @@ class Person extends Component {
   }
 }
 
-const PersonForm = withFormik({
+const InstitutionForm = withFormik({
   // we can passe the default values props from the parent component - useful for edit
-  mapPropsToValues({ firstName, lastName, username, password, person }) {
+  mapPropsToValues({ firstName, lastName, username, password, institution }) {
     return {
-      title: person.data && person.data.titleId ? person.data.titleId : '',
-      firstName:
-        person.data && person.data.firstName ? person.data.firstName : '',
-      lastName: person.data && person.data.lastName ? person.data.lastName : '',
-
-      genderId: person.data && person.data.genderId ? person.data.genderId : '',
-      languageId:
-        person.data && person.data.languageId ? person.data.languageId : '',
-      dateOfBirth:
-        person.data && person.data.dateOfBirth
-          ? moment(person.data.dateOfBirth).format('YYYY-MM-DD')
+      acronym:
+        institution.data && institution.data.acronym
+          ? institution.data.acronym
           : '',
-      address1: person.data && person.data.address1 ? person.data.address1 : '',
-      address2: person.data && person.data.address2 ? person.data.address2 : '',
-      zipCode: person.data && person.data.zipCode ? person.data.zipCode : '',
-      locality: person.data && person.data.locality ? person.data.locality : '',
+      name:
+        institution.data && institution.data.name ? institution.data.name : '',
+      address1:
+        institution.data && institution.data.address1
+          ? institution.data.address1
+          : '',
+      address2:
+        institution.data && institution.data.address2
+          ? institution.data.address2
+          : '',
+
+      zipCode:
+        institution.data && institution.data.zipCode
+          ? institution.data.zipCode
+          : '',
+      locality:
+        institution.data && institution.data.locality
+          ? institution.data.locality
+          : '',
+
       countryId:
-        person.data && person.data.countryId ? person.data.countryId : -1,
-      proPhone: person.data && person.data.proPhone ? person.data.proPhone : '',
-      mobilePhone:
-        person.data && person.data.mobilePhone ? person.data.mobilePhone : '',
-      privatePhone:
-        person.data && person.data.privatePhone ? person.data.privatePhone : '',
-      email: person.data && person.data.email ? person.data.email : ''
+        institution.data && institution.data.countryId
+          ? institution.data.countryId
+          : -1,
+      personInChargeId:
+        institution.data && institution.data.personInChargeId
+          ? institution.data.personInChargeId
+          : -1,
+      personInChargeFunctionId:
+        institution.data && institution.data.personInChargeFunctionId
+          ? institution.data.personInChargeFunctionId
+          : -1,
+
+      phone:
+        institution.data && institution.data.phone
+          ? institution.data.phone
+          : '',
+      fax: institution.data && institution.data.fax ? institution.data.fax : '',
+      url: institution.data && institution.data.url ? institution.data.url : ''
     };
   },
   handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
@@ -566,8 +697,8 @@ const PersonForm = withFormik({
   },
   isInitialValid: true,
   validationSchema: object().shape({
-    firstName: string().required('firstName is required ..'),
-    lastName: string().required('lastName is required ..'),
+    acronym: string().required('Abbréviation is required ..'),
+    name: string().required('Nom is required ..'),
     genderId: string().required('gender is required ..'),
     languageId: string().required('language is required ..'),
     countryId: string().required('country is required ..'),
@@ -576,17 +707,17 @@ const PersonForm = withFormik({
     privatePhone: string().min(10, 'Phone must be 10 or longer'),
     email: string().email('Email is not valid !')
   })
-})(Person);
+})(Institution);
 
-PersonForm.propTypes = {
+InstitutionForm.propTypes = {
   classes: PropTypes.object.isRequired
 };
 const mapStateToProps = state => ({
-  person: state.person,
+  institution: state.institution,
   thesaurus: state.thesaurus
 });
 
 export default connect(mapStateToProps, {
-  ...personActions,
+  ...institutionActions,
   ...thesaurusActions
-})(withErrorHandler(withStyles(styles)(PersonForm), axios));
+})(withErrorHandler(withStyles(styles)(InstitutionForm), axios));

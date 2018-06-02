@@ -1,7 +1,6 @@
 import React from 'react';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Route, Router, Switch } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
-import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
 import Login from '../containers/Login/Login';
 import { LOCAL_STORAGE_USER_KEY } from '../store/actions/Types';
@@ -16,6 +15,7 @@ import Users from '../components/Users/Users';
 import Table from '../components/Table/Table';
 import Person from '../components/Persons/Person/Person';
 import Project from '../components/Projects/Project/Project';
+import Institution from '../components/Institutions/Institution/Institution';
 
 const loadCurrentUserFromLocalStorage = () => {
   return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_KEY));
@@ -44,7 +44,9 @@ const AppRouter = props => {
         <PrivateRoute path="/projects/:id" exact component={Project} />
         <PrivateRoute path="/projects" component={Projects} />
 
+        <PrivateRoute path="/institutions/:id" exact component={Institution} />
         <PrivateRoute path="/institutions" component={Institutions} />
+
         <PrivateRoute path="/users" component={Users} />
         <PrivateRoute path="/tables" component={Table} />
         <PrivateRoute path="/" exact component={Dashboard} />
