@@ -107,6 +107,7 @@ class Users extends Component {
     }));
 
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
+
     const res = await this.requestData(requestParams);
 
     const filteredFor = this.getParamByNameFormUrl(
@@ -233,10 +234,12 @@ class Users extends Component {
               }
             ]}
             manual // Forces table not to paginate or sort automatically, so we can handle it server-side
-            data={data}
-            pages={pages} // Display the total number of pages
+            data={data ? data : []}
+            pages={pages ? pages : -1} // Display the total number of pages
             loading={loading} // Display the loading overlay when we need it
-            onFetchData={this.fetchData} // Request new data when things change
+            onFetchData={(state, instance) => {
+              return this.fetchData(state, instance);
+            }} // Request new data when things change
             filterable
             defaultPageSize={10}
             className="-striped -highlight"
@@ -247,6 +250,13 @@ class Users extends Component {
               }
             ]}
             filterable={false}
+            previousText="Previous"
+            nextText="Next"
+            loadingText="Chargement..."
+            noDataText="No rows found"
+            pageText="Page"
+            ofText="of"
+            rowsText="rows"
           />
         </Paper>
         <br />
