@@ -14,7 +14,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
-import loginCss from './Login.css';
+import './Login.css';
 
 import backgroundImage from '../../assets/images/bg-01.jpg';
 import withErrorHandler from '../../components/withErrorHandler/withErrorHandler';
@@ -71,18 +71,18 @@ class Login extends Component {
     console.log(this.error);
     console.log(this.touched);
     return (
-      <div className={loginCss.Limiter}>
-        <div className={loginCss.ContainerLogin100}>
-          <div className={loginCss.WrapLogin100}>
+      <div className="Limiter">
+        <div className="ContainerLogin100">
+          <div className="WrapLogin100">
             <div
-              className={loginCss.Login100FormTitle}
+              className="Login100FormTitle"
               style={{ backgroundImage: `url(${backgroundImage})` }}
             >
-              <span className={loginCss.Login100FormTitle1}>Sign In</span>
+              <span className="Login100FormTitle1">Sign In</span>
             </div>
 
             {this.props.auth.error !== null ? (
-              <div className={loginCss.ErrorLogin}>
+              <div className="ErrorLogin">
                 Nom d'utilisateur ou mot de passe invalide
               </div>
             ) : null}
@@ -159,7 +159,6 @@ class Login extends Component {
             </Form>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }

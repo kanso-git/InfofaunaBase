@@ -5,8 +5,6 @@ import './NavigationItems.css';
 import NavigationItem from './NavigationItem/NavigationItem';
 import Button from '@material-ui/core/Button';
 import ExitToApp from '@material-ui/icons/ExitToApp';
-import IconButton from '@material-ui/core/IconButton';
-import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { authActions } from '../../../store/actions';
@@ -42,7 +40,11 @@ class NavigationItems extends React.Component {
 
   handleClose = () => {
     this.setState({ anchorEl: null });
-    //this.props.logout();
+    //
+  };
+  handleLogout = () => {
+    this.setState({ anchorEl: null });
+    this.props.logout();
   };
 
   render() {
@@ -96,8 +98,7 @@ class NavigationItems extends React.Component {
             onClose={this.handleClose}
           >
             <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-            <MenuItem onClick={this.handleClose}>
-              {' '}
+            <MenuItem onClick={this.handleLogout}>
               Logout <ExitToApp />
             </MenuItem>
           </Menu>

@@ -5,23 +5,21 @@
 
 .ContainerLogin100 {
   width: 100%;
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 0px;
   background: #ebeeef;
 }
 
 .WrapLogin100 {
-
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
   position: relative;
 }
-
 
 .Login100FormTitle {
   width: 100%;
@@ -60,12 +58,12 @@
   background-color: rgba(54, 84, 99, 0.7);
 }
 
-.ErrorLogin{
-    display: block;
-    margin: 20px 0;
-    padding: 15px 30px 15px 15px;
-    border-left: 5px solid #d9534f;
-    background-color: #f4cecd;
+.ErrorLogin {
+  display: block;
+  margin: 20px 0;
+  padding: 15px 30px 15px 15px;
+  border-left: 5px solid #d9534f;
+  background-color: #f4cecd;
 }
 /**
 @media (max-width: 500px) {

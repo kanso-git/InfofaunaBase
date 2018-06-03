@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 import PrivateRoute from './PrivateRoute';
+import PublicRoute from './PublicRoute';
 import Login from '../containers/Login/Login';
 import { LOCAL_STORAGE_USER_KEY } from '../store/actions/Types';
 import { authActions } from '../store/actions';
@@ -36,7 +37,7 @@ const AppRouter = props => {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/login" exact component={Login} />
+        <PublicRoute path="/login" exact component={Login} />
 
         <PrivateRoute path="/persons/:id" component={Person} />
         <PrivateRoute path="/persons" exact component={Persons} />
