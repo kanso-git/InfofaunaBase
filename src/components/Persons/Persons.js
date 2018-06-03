@@ -53,12 +53,22 @@ class Persons extends Component {
     filtered: ''
   };
 
+  getParamByNameFormUrl = (name, url) => {
+    if (
+      (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
+        url
+      ))
+    )
+      return decodeURIComponent(name[1]);
+  };
   handleOpen = id => {
     console.log(`handleOpen :: open the details of person with id:${id}`);
     this.props.history.push('/persons/' + id);
   };
+
   handleFiltered = async e => {
     const filtered = e.target.value;
+    this.filtered = filtered;
     const updatedState = { ...this.state, filtered, page: 0 };
     this.setState(() => ({
       filtered,
@@ -91,7 +101,7 @@ class Persons extends Component {
       state.pageSize,
       state.page,
       state.sorted,
-      state.filtered ? state.filtered : ''
+      this.filtered ? this.filtered : ''
     );
 
     this.setState(() => ({
@@ -100,14 +110,25 @@ class Persons extends Component {
       pageSize: state.pageSize,
       page: state.page
     }));
+
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
     const res = await this.requestData(requestParams);
 
-    this.setState(() => ({
-      data: res.data.rows,
-      pages: Math.ceil(res.data.total / state.pageSize),
-      loading: false
-    }));
+    const filteredFor = this.getParamByNameFormUrl(
+      'search',
+      res.request.responseURL
+    );
+    if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
+      this.setState(() => ({
+        loading: false
+      }));
+    } else {
+      this.setState(() => ({
+        data: res.data.rows,
+        pages: Math.ceil(res.data.total / state.pageSize),
+        loading: false
+      }));
+    }
   };
 
   render() {
@@ -149,8 +170,9 @@ class Persons extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onClick: e => {
-                  console.log(rowInfo.row._original.id);
-                  this.handleOpen(rowInfo.row._original.id);
+                  if (rowInfo) {
+                    this.handleOpen(rowInfo.row._original.id);
+                  }
                 }
               };
             }}

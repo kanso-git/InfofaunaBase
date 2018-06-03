@@ -7,8 +7,6 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-import Icon from '@material-ui/core/Icon';
-import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import axios from '../../axios-infofauna';
@@ -53,6 +51,14 @@ class Projects extends Component {
     searchInstitutionName: ''
   };
 
+  getParamByNameFormUrl = (name, url) => {
+    if (
+      (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
+        url
+      ))
+    )
+      return decodeURIComponent(name[1]);
+  };
   handleOpen = id => {
     console.log(`handleOpen :: open the details of project with id:${id}`);
     this.props.history.push('/projects/' + id);
@@ -60,13 +66,14 @@ class Projects extends Component {
 
   handleFiltered = (key, e) => {
     const filtered = e.target.value;
-    const updatedState = { ...this.state, [key]: filtered, page: 0 };
+    this.filtered = { [key]: filtered };
+    this.updatedState = { ...this.state, [key]: filtered, page: 0 };
     this.setState(() => ({
       [key]: filtered,
       page: 0
     }));
 
-    this.fetchData(updatedState);
+    this.fetchData(this.updatedState);
   };
 
   // pageSize=20&page=1&orderBy=designation&sortOrder=asc&searchCodeName=Biodiv&searchInstitutionName=AQUABUG
@@ -105,14 +112,30 @@ class Projects extends Component {
       state.pageSize,
       state.page,
       state.sorted,
-      state.searchCodeName ? state.searchCodeName : '',
-      state.searchInstitutionName ? state.searchInstitutionName : ''
+      this.updatedState ? this.updatedState.searchCodeName : '',
+      this.updatedState ? this.updatedState.searchInstitutionName : ''
     );
-    this.setState({
-      data: res.data.rows,
-      pages: Math.ceil(res.data.total / state.pageSize),
-      loading: false
-    });
+
+    const filteredKey = this.filtered ? Object.keys(this.filtered)[0] : '';
+    const filteredFor = this.getParamByNameFormUrl(
+      filteredKey,
+      res.request.responseURL
+    );
+
+    if (
+      (filteredFor || filteredKey) &&
+      filteredFor !== this.filtered[filteredKey]
+    ) {
+      this.setState(() => ({
+        loading: false
+      }));
+    } else {
+      this.setState(() => ({
+        data: res.data.rows,
+        pages: Math.ceil(res.data.total / state.pageSize),
+        loading: false
+      }));
+    }
   };
 
   render() {
@@ -166,8 +189,9 @@ class Projects extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onClick: e => {
-                  console.log(rowInfo.row._original.id);
-                  this.handleOpen(rowInfo.row._original.id);
+                  if (rowInfo) {
+                    this.handleOpen(rowInfo.row._original.id);
+                  }
                 }
               };
             }}

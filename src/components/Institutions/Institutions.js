@@ -7,9 +7,6 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-import Icon from '@material-ui/core/Icon';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ExplorIcon from '@material-ui/icons/Explore';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import axios from '../../axios-infofauna';
@@ -51,12 +48,21 @@ class Institutions extends Component {
     filtered: ''
   };
 
+  getParamByNameFormUrl = (name, url) => {
+    if (
+      (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
+        url
+      ))
+    )
+      return decodeURIComponent(name[1]);
+  };
   handleOpen = id => {
     console.log(`handleOpen :: open the details of inistitution with id:${id}`);
     this.props.history.push('/institutions/' + id);
   };
   handleFiltered = async e => {
     const filtered = e.target.value;
+    this.filtered = filtered;
     const updatedState = { ...this.state, filtered, page: 0 };
     this.setState(() => ({
       filtered,
@@ -96,11 +102,21 @@ class Institutions extends Component {
       state.sorted,
       state.filtered ? state.filtered : ''
     );
-    this.setState({
-      data: res.data.rows,
-      pages: Math.ceil(res.data.total / state.pageSize),
-      loading: false
-    });
+    const filteredFor = this.getParamByNameFormUrl(
+      'search',
+      res.request.responseURL
+    );
+    if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
+      this.setState(() => ({
+        loading: false
+      }));
+    } else {
+      this.setState(() => ({
+        data: res.data.rows,
+        pages: Math.ceil(res.data.total / state.pageSize),
+        loading: false
+      }));
+    }
   };
 
   render() {
@@ -142,8 +158,9 @@ class Institutions extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onClick: e => {
-                  console.log(rowInfo.row._original.id);
-                  this.handleOpen(rowInfo.row._original.id);
+                  if (rowInfo) {
+                    this.handleOpen(rowInfo.row._original.id);
+                  }
                 }
               };
             }}
