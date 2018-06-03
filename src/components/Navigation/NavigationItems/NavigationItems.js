@@ -48,6 +48,8 @@ class NavigationItems extends React.Component {
   };
 
   render() {
+    console.log('render NavigationItems ...');
+    console.log(`this.props.activePathname:${this.props.activePathname}`);
     const { classes } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);

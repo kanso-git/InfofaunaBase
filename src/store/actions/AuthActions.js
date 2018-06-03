@@ -26,14 +26,19 @@ const errorLogoutAction = payload => ({
   payload
 });
 
-const setCurrentUserAction = payload =>({
-    type: types.SET_CURRENT_USER,
-    payload
-})
+const setCurrentUserAction = payload => ({
+  type: types.SET_CURRENT_USER,
+  payload
+});
+
+const setActivePathnameAction = payload => ({
+  type: types.SET_ACTIVE_PATHNAME,
+  payload
+});
 
 // axios
-const loginAxios = async (user) => {
-  console.log(`loginAxios user:${JSON.stringify(user,null,3)}`);
+const loginAxios = async user => {
+  console.log(`loginAxios user:${JSON.stringify(user, null, 3)}`);
   return axios.post('api/sessions', user);
 };
 
@@ -41,18 +46,25 @@ const logoutAxios = async orderData => {
   return axios.delete('api/sessions/current', orderData);
 };
 
-
 // actions
 const initiateLogin = () => dispatch => dispatch(initiateLoginAction());
 
-
 const login = payload => async (dispatch, getState) => {
   try {
-      const user={...payload, clientDomain:window.location.hostname.split('.').slice(-2).join('.')};
-      console.log(`login user:${JSON.stringify(user,null,3)}`)
-      const userResponse = await loginAxios(user);
-      localStorage.setItem(types.LOCAL_STORAGE_USER_KEY, JSON.stringify(userResponse.data));
-      dispatch(loginAction(userResponse.data));
+    const user = {
+      ...payload,
+      clientDomain: window.location.hostname
+        .split('.')
+        .slice(-2)
+        .join('.')
+    };
+    console.log(`login user:${JSON.stringify(user, null, 3)}`);
+    const userResponse = await loginAxios(user);
+    localStorage.setItem(
+      types.LOCAL_STORAGE_USER_KEY,
+      JSON.stringify(userResponse.data)
+    );
+    dispatch(loginAction(userResponse.data));
   } catch (e) {
     dispatch(errorLogingAction('login error'));
   }
@@ -60,14 +72,22 @@ const login = payload => async (dispatch, getState) => {
 
 const logout = payload => async (dispatch, getState) => {
   try {
-        localStorage.removeItem(types.LOCAL_STORAGE_USER_KEY);
-        const loginAxios = await logoutAction({clientDomain:window.location.hostname.split('.').slice(-2).join('.')});
-        dispatch(logoutAction());
+    localStorage.removeItem(types.LOCAL_STORAGE_USER_KEY);
+    const loginAxios = await logoutAction({
+      clientDomain: window.location.hostname
+        .split('.')
+        .slice(-2)
+        .join('.')
+    });
+    dispatch(logoutAction());
   } catch (e) {
     dispatch(errorLogoutAction('error placing order'));
   }
 };
 
-const setCurrentUser = (user) => dispatch => dispatch(setCurrentUserAction(user));
+const setCurrentUser = user => dispatch => dispatch(setCurrentUserAction(user));
 
-export { initiateLogin, login, logout, setCurrentUser };
+const setActivePathname = activePathname => dispatch =>
+  dispatch(setActivePathnameAction(activePathname));
+
+export { initiateLogin, login, logout, setCurrentUser, setActivePathname };
