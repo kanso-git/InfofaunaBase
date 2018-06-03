@@ -37,15 +37,15 @@ const AppRouter = props => {
   return (
     <Router history={history}>
       <Switch>
-        <PublicRoute path="/login" exact component={Login} />
+        <PublicRoute path="/login" component={Login} />
 
         <PrivateRoute path="/persons/:id" component={Person} />
-        <PrivateRoute path="/persons" exact component={Persons} />
+        <PrivateRoute path="/persons" component={Persons} />
 
-        <PrivateRoute path="/projects/:id" exact component={Project} />
+        <PrivateRoute path="/projects/:id" component={Project} />
         <PrivateRoute path="/projects" component={Projects} />
 
-        <PrivateRoute path="/institutions/:id" exact component={Institution} />
+        <PrivateRoute path="/institutions/:id" component={Institution} />
         <PrivateRoute path="/institutions" component={Institutions} />
 
         <PrivateRoute path="/users" component={Users} />
