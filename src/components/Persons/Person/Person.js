@@ -21,7 +21,6 @@ import TextField from '@material-ui/core/TextField';
 import moment from '../../../moment-local';
 import './Person.css';
 import withErrorHandler from '../../../components/withErrorHandler/withErrorHandler';
-import Spinner from '../../../components/UI/Spinner/Spinner';
 import axios from '../../../axios-infofauna';
 import { personActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
@@ -79,9 +78,6 @@ class Person extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    console.log(
-      '>>>>>>>>>>>>>>>>loadingProgress :' + this.state.loadingProgress
-    );
 
     if (
       !this.props.person.ongoingFetch &&
@@ -102,7 +98,6 @@ class Person extends Component {
       if (!this.props.thesaurus[types.REALM_LANGUAGE]) {
         this.props.fetchThesaurus(types.REALM_LANGUAGE);
       }
-
       this.props.fetchPerson(id);
     }
   }
@@ -530,7 +525,11 @@ class Person extends Component {
 
 const PersonForm = withFormik({
   // we can passe the default values props from the parent component - useful for edit
-  mapPropsToValues({ firstName, lastName, username, password, person }) {
+  enableReinitialize: true,
+
+  mapPropsToValues(props) {
+    const { firstName, lastName, username, password, person } = props;
+
     return {
       title: person.data && person.data.titleId ? person.data.titleId : '',
       firstName:

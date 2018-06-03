@@ -642,6 +642,7 @@ class Institution extends Component {
 
 const InstitutionForm = withFormik({
   // we can passe the default values props from the parent component - useful for edit
+  enableReinitialize: true,
   mapPropsToValues({ firstName, lastName, username, password, institution }) {
     return {
       acronym:

@@ -1056,6 +1056,7 @@ class Project extends Component {
 
 const ProjectForm = withFormik({
   // we can passe the default values props from the parent component - useful for edit
+  enableReinitialize: true,
   mapPropsToValues({ firstName, lastName, username, password, project }) {
     return {
       code: project.data && project.data.code ? project.data.code : '',
