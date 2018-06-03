@@ -29,7 +29,7 @@ const AppRouter = props => {
   if (!props.auth.user) {
     const user = loadCurrentUserFromLocalStorage();
     if (user) {
-      console.log(`user form local storage: ${JSON.stringify(user, null, 3)}`);
+      // console.log(`user form local storage: ${JSON.stringify(user, null, 3)}`);
       props.setCurrentUser(user);
     }
   }
