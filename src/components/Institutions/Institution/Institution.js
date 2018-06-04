@@ -36,6 +36,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Chip from '@material-ui/core/Chip';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
+import Audit from "../../Audit/Audit";
 
 let suggestionsPerson = [];
 
@@ -309,10 +310,17 @@ class Institution extends Component {
       handleSubmit,
       isSubmitting,
       isValid,
-      thesaurus
+      thesaurus,
+        institution
     } = this.props;
 
-    if (this.props.institution.ongoingFetch) {
+      let auditData={};
+      if(institution.data){
+          auditData={...institution.data.auditDTO}
+      }
+
+
+      if (this.props.institution.ongoingFetch) {
       return (
         <div className="InstitutionContainer">
           <Paper className={classes.root} elevation={4}>
@@ -357,7 +365,7 @@ class Institution extends Component {
               />
             </Tooltip>
           </div>
-
+            <Audit {...auditData}/>
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>

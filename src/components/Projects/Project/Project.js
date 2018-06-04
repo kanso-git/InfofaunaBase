@@ -39,6 +39,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import MaskedInput from 'react-text-mask';
 import NumberFormat from 'react-number-format';
+import Audit from "../../Audit/Audit";
 
 let suggestionsProject = [];
 let suggestionsPrincipalInstitution = [];
@@ -398,10 +399,17 @@ class Project extends Component {
       handleSubmit,
       isSubmitting,
       isValid,
-      thesaurus
+      thesaurus,
+        project
     } = this.props;
 
-    if (this.props.project.ongoingFetch) {
+      let auditData={};
+      if(project.data){
+          auditData={...project.data.auditDTO}
+      }
+
+
+      if (this.props.project.ongoingFetch) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
@@ -446,7 +454,7 @@ class Project extends Component {
               />
             </Tooltip>
           </div>
-
+            <Audit {...auditData}/>
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>

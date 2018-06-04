@@ -26,6 +26,10 @@ import { personActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
 import { NavLink, Redirect } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Audit from "../../Audit/Audit";
+
+
+
 const styles = theme => ({
   container: {
     display: 'flex',
@@ -111,6 +115,7 @@ class Person extends Component {
 
   render() {
     const { classes } = this.props;
+
     const {
       values,
       errors,
@@ -121,8 +126,14 @@ class Person extends Component {
       handleSubmit,
       isSubmitting,
       isValid,
-      thesaurus
+      thesaurus,
+        person
     } = this.props;
+
+    let auditData={};
+    if(person.data){
+        auditData={...person.data.auditDTO}
+    }
 
     if (this.props.person.ongoingFetch) {
       return (
@@ -149,7 +160,7 @@ class Person extends Component {
           <Typography variant="headline" component="h3">
             <NavLink to="/persons" className={classes.backLink}>
               Personnes
-            </NavLink>{' '}
+            </NavLink>
             >
             <span className={classes.actualSite}> Détail personne</span>
           </Typography>
@@ -169,6 +180,7 @@ class Person extends Component {
               />
             </Tooltip>
           </div>
+            <Audit {...auditData}/>
 
           <Form>
             <br />
