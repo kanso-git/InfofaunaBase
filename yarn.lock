@@ -1065,7 +1065,7 @@ babel-register@^6.26.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@6.26.0, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.26.0:
+babel-runtime@6.26.0, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -5033,6 +5033,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
+material-responsive-grid@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/material-responsive-grid/-/material-responsive-grid-1.1.1.tgz#f31a1657bffa2d756cb279179fc846d1e44f03f2"
+
 math-expression-evaluator@^1.2.14:
   version "1.2.17"
   resolved "https://registry.yarnpkg.com/math-expression-evaluator/-/math-expression-evaluator-1.2.17.tgz#de819fdbcd84dccd8fae59c6aeb79615b9d266ac"
@@ -6409,6 +6413,14 @@ react-jss@^8.1.0:
 react-lifecycles-compat@^3.0.2:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+
+react-material-responsive-grid@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/react-material-responsive-grid/-/react-material-responsive-grid-1.2.1.tgz#2bb1bc37bcaad5258b3288be68fa872bdc452520"
+  dependencies:
+    babel-runtime "^6.23.0"
+    material-responsive-grid "^1.1.0"
+    prop-types "^15.5.10"
 
 react-number-format@^3.3.4:
   version "3.3.4"
