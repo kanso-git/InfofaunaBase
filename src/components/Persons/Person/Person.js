@@ -18,6 +18,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
+import { translate, Trans } from 'react-i18next';
 import moment from '../../../moment-local';
 import './Person.css';
 import withErrorHandler from '../../../components/withErrorHandler/withErrorHandler';
@@ -74,6 +75,14 @@ const styles = theme => ({
   }
 });
 
+let Person_FirstName_is_required;
+let Person_LastName_is_required;
+let Person_Gendre_is_required;
+let Person_Language_is_required ;
+let Person_Country_is_required;
+let Person_Phone_format_is_not_valid;
+let Person_Email_format_is_not_valid;
+
 class Person extends Component {
   state = {
     loadingProgress: false,
@@ -113,8 +122,13 @@ class Person extends Component {
     this.setState({ showPassword: !this.state.showPassword });
   };
 
+
+
   render() {
+
+
     const { classes } = this.props;
+    const {t,i18n } = this.props;
 
     const {
       values,
@@ -129,6 +143,13 @@ class Person extends Component {
       thesaurus,
         person
     } = this.props;
+      Person_FirstName_is_required =t('Person FirstName is required');
+      Person_LastName_is_required =t('Person LastName is required');
+      Person_Gendre_is_required =t('Person Gendre is required');
+      Person_Language_is_required =t('Person Language is required');
+      Person_Country_is_required =t('Person Country is required');
+      Person_Phone_format_is_not_valid =t('Person Phone format is not valid');
+      Person_Email_format_is_not_valid =t('Person Email format is not valid');
 
     let auditData={};
     if(person.data){
@@ -140,7 +161,7 @@ class Person extends Component {
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
             <Typography variant="headline" component="h3">
-              chrargement personne ...
+                {t('Person Loading Person')}
             </Typography>
             <br />
             <br />
@@ -159,14 +180,13 @@ class Person extends Component {
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
             <NavLink to="/persons" className={classes.backLink}>
-              Personnes
-            </NavLink>
-            >
-            <span className={classes.actualSite}> Détail personne</span>
+                {t('Person Persons')}
+            </NavLink> >
+            <span className={classes.actualSite}> {t('Person Person Detail')}</span>
           </Typography>
 
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+            <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
                 control={
                   <Switch
@@ -176,7 +196,7 @@ class Person extends Component {
                     color="primary"
                   />
                 }
-                label="Enable edit mode"
+                label= {t('Form Enable edit mode')}
               />
             </Tooltip>
           </div>
@@ -185,7 +205,7 @@ class Person extends Component {
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Information personnelle</Typography>
+              <Typography component="p">  {t('Person Personal information')}</Typography>
 
               <FormControl
                 className={classes.formControl}
@@ -195,7 +215,7 @@ class Person extends Component {
                   disabled={!this.state.enableEditMode}
                   id="select-title-native"
                   select
-                  label="Titre académique"
+                  label= {t('Person Academic title')}
                   name="title"
                   className={classes.textField}
                   style={{ width: 150 }}
@@ -223,7 +243,7 @@ class Person extends Component {
                 className={classes.formControl}
                 error={touched.firstName && errors.firstName ? true : false}
               >
-                <InputLabel htmlFor="firstName">*Prénom</InputLabel>
+                <InputLabel htmlFor="firstName">*{t('Person Firstname')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="firstName"
@@ -246,7 +266,7 @@ class Person extends Component {
                 className={classes.formControl}
                 error={touched.lastName && errors.lastName ? true : false}
               >
-                <InputLabel htmlFor="lastName">*Nom</InputLabel>
+                <InputLabel htmlFor="lastName">*{t('Person Lastname')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="lastName"
@@ -271,7 +291,7 @@ class Person extends Component {
                   id="select-gender-native"
                   name="genderId"
                   select
-                  label="*Genre"
+                  label={t('Person Gendre')}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.genderId}
@@ -302,7 +322,7 @@ class Person extends Component {
                   id="select-language-native"
                   name="languageId"
                   select
-                  label="*Langue"
+                  label ={t('Person Language')}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.languageId}
@@ -331,7 +351,7 @@ class Person extends Component {
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="date"
-                  label="Birthday"
+                  label=  {t('Person Date of birth')}
                   name="dateOfBirth"
                   type="date"
                   onChange={handleChange}
@@ -345,13 +365,13 @@ class Person extends Component {
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="h4">Adresse</Typography>
+              <Typography component="h4">{t('Person Address')}</Typography>
 
               <FormControl
                 className={classes.formControl}
                 error={touched.address1 && errors.address1 ? true : false}
               >
-                <InputLabel htmlFor="address1">Rue et numéro</InputLabel>
+                <InputLabel htmlFor="address1">{t('Person Street and number')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="address1"
@@ -368,7 +388,7 @@ class Person extends Component {
                 className={classes.formControl}
                 error={touched.address2 && errors.address2 ? true : false}
               >
-                <InputLabel htmlFor="address2">Complément</InputLabel>
+                <InputLabel htmlFor="address2">{t('Person Additional information')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="address2"
@@ -382,7 +402,7 @@ class Person extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="zipCode">Code postal</InputLabel>
+                <InputLabel htmlFor="zipCode">{t('Person Postal code')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="zipCode"
@@ -397,7 +417,7 @@ class Person extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="locality">Localité</InputLabel>
+                <InputLabel htmlFor="locality">{t('Person City')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="locality"
@@ -416,7 +436,7 @@ class Person extends Component {
                   id="select-pays-native"
                   name="countryId"
                   select
-                  label="*Pays"
+                  label={t('Person Country')}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.countryId}
@@ -443,10 +463,10 @@ class Person extends Component {
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Information de contact</Typography>
+              <Typography component="p">{t('Person Contact informations')}</Typography>
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="proPhone">
-                  Téléphone professionnel
+                    {t('Person Professional phone')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -461,7 +481,7 @@ class Person extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="mobilePhone">Téléphone mobile</InputLabel>
+                <InputLabel htmlFor="mobilePhone">{t('Person Mobile phone')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="mobilePhone"
@@ -475,7 +495,7 @@ class Person extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="privatePhone">Téléphone privé</InputLabel>
+                <InputLabel htmlFor="privatePhone"> {t('Person Private phone')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="privatePhone"
@@ -489,7 +509,7 @@ class Person extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="email">E-mail</InputLabel>
+                <InputLabel htmlFor="email">{t('Person E-mail')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="email"
@@ -515,7 +535,7 @@ class Person extends Component {
                   size="small"
                 >
                   <Save className={classNames(classes.rightIcon)} />
-                  Save
+                    {t('Person Save')}
                 </Button>
 
                 <Button
@@ -523,7 +543,7 @@ class Person extends Component {
                   variant="raised"
                   color="secondary"
                 >
-                  Delete
+                    {t('Person Delete')}
                   <Delete className={classes.rightIcon} />
                 </Button>
               </div>
@@ -577,15 +597,15 @@ const PersonForm = withFormik({
   },
   isInitialValid: true,
   validationSchema: object().shape({
-    firstName: string().required('firstName is required ..'),
-    lastName: string().required('lastName is required ..'),
-    genderId: string().required('gender is required ..'),
-    languageId: string().required('language is required ..'),
-    countryId: string().required('country is required ..'),
-    proPhone: string().min(10, 'Phone must be 10 or longer'),
-    mobilePhone: string().min(10, 'Phone must be 10 or longer'),
-    privatePhone: string().min(10, 'Phone must be 10 or longer'),
-    email: string().email('Email is not valid !')
+    firstName: string().required(Person_FirstName_is_required),
+    lastName: string().required(Person_LastName_is_required),
+    genderId: string().required(Person_Gendre_is_required),
+    languageId: string().required(Person_Language_is_required),
+    countryId: string().required(Person_Country_is_required),
+    proPhone: string().min(10,Person_Phone_format_is_not_valid),
+    mobilePhone: string().min(10, Person_Phone_format_is_not_valid),
+    privatePhone: string().min(10, Person_Phone_format_is_not_valid),
+    email: string().email(Person_Email_format_is_not_valid)
   })
 })(Person);
 
@@ -600,4 +620,4 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps, {
   ...personActions,
   ...thesaurusActions
-})(withErrorHandler(withStyles(styles)(PersonForm), axios));
+})(withErrorHandler(withStyles(styles)(translate('translations')(PersonForm)), axios));

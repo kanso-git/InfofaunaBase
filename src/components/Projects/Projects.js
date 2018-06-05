@@ -8,6 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
+import { translate, Trans } from 'react-i18next';
 
 import axios from '../../axios-infofauna';
 import cssProjects from './Projects.css';
@@ -139,21 +140,22 @@ class Projects extends Component {
   };
 
   render() {
+    const { t, i18n } = this.props;
     const { classes } = this.props;
     const { data, pages, loading } = this.state;
     return (
       <div className={cssProjects.PersonsContainer}>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Gestion des projects
+              {t('Project Projects management')}
           </Typography>
           <Typography component="p">
-            Gestion des projets, ajouter, modifier et supprimer
+              {t('Project Management, add, edit and delete')}
           </Typography>
 
           <TextField
             id="name"
-            label="Filtrer par code/nom :"
+            label={t('Project Filter by code or name')}
             className={classes.textField}
             value={this.state.searchCodeName}
             onChange={event => this.handleFiltered('searchCodeName', event)}
@@ -162,7 +164,7 @@ class Projects extends Component {
 
           <TextField
             id="name"
-            label="Filtrer par institution"
+            label={t('Project Filter by institution')}
             className={classes.textField}
             value={this.state.searchInstitutionName}
             onChange={event =>
@@ -172,7 +174,7 @@ class Projects extends Component {
           />
 
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+            <Tooltip id="tooltip-fab" title={t('Project Add new project')}>
               <Button
                 variant="fab"
                 color="primary"
@@ -197,20 +199,20 @@ class Projects extends Component {
             }}
             columns={[
               {
-                Header: 'Projet',
+                Header: t('Project Project'),
 
                 columns: [
                   {
-                    Header: 'Code IFF',
+                    Header:  t('Project Code IFF'),
                     accessor: 'code',
                     maxWidth: 150
                   },
                   {
-                    Header: 'Nom',
+                    Header: t('Project Name'),
                     accessor: 'designation'
                   },
                   {
-                    Header: 'Type',
+                    Header: t('Project Type'),
                     accessor: 'projectTypeI18n',
                     maxWidth: 150,
                     sortable: false
@@ -219,16 +221,16 @@ class Projects extends Component {
               },
 
               {
-                Header: 'Institution',
+                Header:  t('Project Institution'),
                 columns: [
                   {
-                    Header: 'Mandante',
+                    Header:  t('Project Mandating institution'),
                     accessor: 'principalInstitution.name',
                     sortable: false,
                     maxWidth: 300
                   },
                   {
-                    Header: 'Mandataire',
+                    Header:  t('Project Mandatory institution'),
                     accessor: 'mandataryInstitution.name',
                     sortable: false,
                     maxWidth: 300
@@ -251,6 +253,13 @@ class Projects extends Component {
               }
             ]}
             filterable={false}
+            previousText={t('Table Previous')}
+            nextText={t('Table Next')}
+            loadingText={t('Table Loading')}
+            noDataText={t('Table No rows found')}
+            pageText={t('Table Page')}
+            ofText={t('Table Of')}
+            rowsText={t('Table Rows')}
           />
         </Paper>
         <br />
@@ -264,5 +273,5 @@ Projects.propTypes = {
 };
 
 export default connect(null, { ...projectActions })(
-  withStyles(styles)(Projects)
+  withStyles(styles)(translate('translations')(Projects))
 );

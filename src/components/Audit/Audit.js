@@ -11,6 +11,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { translate, Trans } from 'react-i18next';
 import moment from '../../moment-local';
 
 import {NavLink, Redirect} from 'react-router-dom';
@@ -34,33 +35,34 @@ const ROW_HEIGHT= 25;
 
 const Audit = (props) => {
     const { classes } = props;
+    const { t, i18n } = props;
 
     return (
         <div style={{width:'100%', marginTop:50, marginBottom:-20}}>
-            <ExpansionPanel  defaultExpanded={true} >
+            <ExpansionPanel  defaultExpanded={false} >
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography className={classes.heading}>Historique de la saisie et des modifications des données</Typography>
+                    <Typography className={classes.heading}>{t('Audit Data creation and modification history')}</Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow style={{height:ROW_HEIGHT}}>
                                 <TableCell></TableCell>
-                                <TableCell>Date et heure</TableCell>
-                                <TableCell>User</TableCell>
+                                <TableCell>{t('Audit Date and hour')}</TableCell>
+                                <TableCell>{t('Audit User')}</TableCell>
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
                             <TableRow style={{height:ROW_HEIGHT}}>
                                 <TableCell component="th" scope="row" colSpan={3} style={{textAlign:'center'}}>
-                                    Utilisateurs de la base de données ORACLE
+                                    {t('Audit ORACLE Database users')}
                                 </TableCell>
                             </TableRow>
 
                                     <TableRow key={1} style={{height:ROW_HEIGHT}}>
                                         <TableCell component="th" scope="row">
-                                            Création
+                                            {t('Audit Creation')}
                                         </TableCell>
                                         <TableCell >{props.oraCreationDate ? moment(props.oraCreationDate).format('DD.MM.YYYY hh:mm:ss') :''}</TableCell>
                                         <TableCell >{props.oraCreationUser }</TableCell>
@@ -68,7 +70,7 @@ const Audit = (props) => {
 
                                     <TableRow key={2} style={{height:ROW_HEIGHT}}>
                                         <TableCell component="th" scope="row">
-                                            Dernière modification
+                                            {t('Audit Last Update')}
                                         </TableCell>
                                         <TableCell >{props.oraLastUpdateDate ? moment(props.oraLastUpdateDate).format('DD.MM.YYYY hh:mm:ss'):''}</TableCell>
                                         <TableCell >{props.oraLastUpdateUser}</TableCell>
@@ -76,12 +78,12 @@ const Audit = (props) => {
 
                             <TableRow style={{height:ROW_HEIGHT}}>
                                 <TableCell component="th" scope="row" colSpan={3} style={{textAlign:'center'}}>
-                                    Utilisateurs du système d’information
+                                    {t('Audit Web application users')}
                                 </TableCell>
                             </TableRow>
                             <TableRow key={3} style={{height:ROW_HEIGHT}}>
                                 <TableCell component="th" scope="row">
-                                    Création
+                                    {t('Audit Creation')}
                                 </TableCell>
                                 <TableCell >{props.appCreationDate ? moment(props.appCreationDate).format('DD.MM.YYYY hh:mm:ss'):''}</TableCell>
                                 <TableCell >{props.appCreationUser ? <NavLink to={'/users/'+props.appCreationUserId} >{props.appCreationUser}</NavLink> : ''}</TableCell>
@@ -89,7 +91,7 @@ const Audit = (props) => {
 
                             <TableRow key={4} style={{height:ROW_HEIGHT}}>
                                 <TableCell component="th" scope="row">
-                                    Dernière modification
+                                    {t('Audit Last Update')}
                                 </TableCell>
                                 <TableCell >{props.appLastUpdateDate  ? moment(props.appLastUpdateDate).format('DD.MM.YYYY hh:mm:ss'):''}</TableCell>
                                 <TableCell >{props.appLastUpdateUser ? <NavLink to={'/users/'+props.appLastUpdateUser} >{props.appLastUpdateUser}</NavLink> : ''}</TableCell>
@@ -108,4 +110,4 @@ Audit.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Audit);
+export default withStyles(styles)(translate('translations')(Audit));

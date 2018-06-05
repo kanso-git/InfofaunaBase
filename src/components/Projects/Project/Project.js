@@ -18,6 +18,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
+import { translate, Trans } from 'react-i18next';
 import moment from '../../../moment-local';
 import './Project.css';
 import withErrorHandler from '../../../components/withErrorHandler/withErrorHandler';
@@ -77,7 +78,7 @@ function SelectWrapped(props) {
   return (
     <Select
       optionComponent={Option}
-      noResultsText={<Typography>{'No results found'}</Typography>}
+      noResultsText={<Typography>{AUTOCOMPLET_No_results_found}</Typography>}
       arrowRenderer={arrowProps => {
         return arrowProps.isOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />;
       }}
@@ -312,6 +313,7 @@ const styles = theme => ({
   }
 });
 
+let AUTOCOMPLET_No_results_found ;
 class Project extends Component {
   state = {
     enableEditMode: false
@@ -387,7 +389,7 @@ class Project extends Component {
         })
       );
     }
-
+    const {t,i18n } = this.props;
     const { classes } = this.props;
     const {
       values,
@@ -403,6 +405,7 @@ class Project extends Component {
         project
     } = this.props;
 
+      AUTOCOMPLET_No_results_found  = t('AUTOCOMPLET No results found');
       let auditData={};
       if(project.data){
           auditData={...project.data.auditDTO}
@@ -414,7 +417,7 @@ class Project extends Component {
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
             <Typography variant="headline" component="h3">
-              Chrargement du projet
+                {t('Project Loading')}
             </Typography>
             <br />
             <br />
@@ -433,14 +436,14 @@ class Project extends Component {
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
             <NavLink to="/projects" className={classes.backLink}>
-              Projects
+                {t('Project Projects')}
             </NavLink>{' '}
             >
-            <span className={classes.actualSite}> Détail du projet</span>
+            <span className={classes.actualSite}>  {t('Project Project Detail')}</span>
           </Typography>
 
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle projectne">
+            <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
                 control={
                   <Switch
@@ -450,7 +453,7 @@ class Project extends Component {
                     color="primary"
                   />
                 }
-                label="Enable edit mode"
+                label={t('Form Enable edit mode')}
               />
             </Tooltip>
           </div>
@@ -458,13 +461,13 @@ class Project extends Component {
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Information du projet</Typography>
+              <Typography component="p">{t('Project Information')}</Typography>
 
               <FormControl
                 className={classes.formControl}
                 error={touched.code && errors.code ? true : false}
               >
-                <InputLabel htmlFor="code">*Code infofauna</InputLabel>
+                <InputLabel htmlFor="code">*{t('Project Code IFF')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="code"
@@ -484,7 +487,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="codeCh">Code info species</InputLabel>
+                <InputLabel htmlFor="codeCh">{t('Project Code CH')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="codeCh"
@@ -501,7 +504,7 @@ class Project extends Component {
                 className={classes.formControl}
                 error={touched.designation && errors.designation ? true : false}
               >
-                <InputLabel htmlFor="designation">*Nom du projet</InputLabel>
+                <InputLabel htmlFor="designation">*{t('Project Description')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="designation"
@@ -521,7 +524,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="codeCh">Projet principale</InputLabel>
+                <InputLabel htmlFor="projectProjectId">{t('Project Parent project')}</InputLabel>
                 <Input
                   name="projectProjectId"
                   inputComponent={SelectWrapped}
@@ -531,7 +534,7 @@ class Project extends Component {
                     this.props.setFieldValue('projectProjectId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Search parent project"
+                  placeholder={t('Project Parent project search')}
                   id="react-select-single"
                   inputProps={{
                     classes,
@@ -555,14 +558,14 @@ class Project extends Component {
                     }}
                   />
                 }
-                label="Projet principale"
+                label={t('Project Principal')}
               />
 
               <FormControl className={classes.formControl}>
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="date"
-                  label="Echéance blocage"
+                  label={t('Project Echance blocking')}
                   name="echeanceBlocage"
                   type="date"
                   onChange={handleChange}
@@ -578,7 +581,7 @@ class Project extends Component {
                 className={classes.formControl}
                 error={touched.url && errors.url ? true : false}
               >
-                <InputLabel htmlFor="url">URL du projet</InputLabel>
+                <InputLabel htmlFor="url">{t('Project URL')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="url"
@@ -601,7 +604,7 @@ class Project extends Component {
                   id="select-projectType-native"
                   name="projectTypeId"
                   select
-                  label="Type du projet"
+                  label={t('Project Type')}
                   className={classes.textField}
                   value={values.projectTypeId}
                   onChange={handleChange}
@@ -632,7 +635,7 @@ class Project extends Component {
                   id="select-language-native"
                   name="projectOriginId"
                   select
-                  label="Origin de financement"
+                  label={t('Project Origin funding')}
                   className={classes.textField}
                   value={values.projectOriginId}
                   onChange={handleChange}
@@ -663,7 +666,7 @@ class Project extends Component {
                   id="select-projectLima-native"
                   name="projectLimaId"
                   select
-                  label="Limites d’accès aux données"
+                  label={t('Project Access limits')}
                   className={classes.textField}
                   value={values.projectLimaId}
                   onChange={handleChange}
@@ -690,7 +693,7 @@ class Project extends Component {
 
               <br />
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="debutJour">Début jour</InputLabel>
+                <InputLabel htmlFor="debutJour">{t('Project Date strat')} {t('Project Date day')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="debutJour"
@@ -710,7 +713,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="debutMois">Début mois</InputLabel>
+                <InputLabel htmlFor="debutMois">{t('Project Date strat')} {t('Project Date month')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="debutMois"
@@ -730,7 +733,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="debutMois">Début année</InputLabel>
+                <InputLabel htmlFor="debutMois">{t('Project Date strat')} {t('Project Date year')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="debutAnnee"
@@ -745,7 +748,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="finJour">Fin jour</InputLabel>
+                <InputLabel htmlFor="finJour">{t('Project Date end')} {t('Project Date day')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="finJour"
@@ -765,7 +768,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="finMois">Fin mois</InputLabel>
+                <InputLabel htmlFor="finMois">{t('Project Date end')} {t('Project Date month')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="finMois"
@@ -785,7 +788,7 @@ class Project extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="finAnnee">Fin année</InputLabel>
+                <InputLabel htmlFor="finAnnee">{t('Project Date end')} {t('Project Date year')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="finAnnee"
@@ -804,7 +807,7 @@ class Project extends Component {
               <TextField
                 disabled={!this.state.enableEditMode}
                 id="description"
-                label="Description du projet"
+                label={t('Project Description')}
                 InputLabelProps={{
                   shrink: true
                 }}
@@ -822,11 +825,11 @@ class Project extends Component {
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="h4">Organisation mandante</Typography>
+              <Typography component="h4">{t('Project Mandating institution')}</Typography>
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="principalInstitutionId">
-                  Nom de l'organisation mandante
+                    {t('Project Mandating institution name')}
                 </InputLabel>
                 <Input
                   name="principalInstitutionId"
@@ -838,7 +841,7 @@ class Project extends Component {
                     this.props.setFieldValue('principalInstitutionId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Rechercher organisation mandante"
+                  placeholder={t('Project Mandating institution name search')}
                   id="react-select-single-principalInstitution"
                   inputProps={{
                     classes,
@@ -852,7 +855,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="principalInstitutionPersonId">
-                  Personne (administrateur / initiateur)
+                    {t('Project Mandating institution person')}
                 </InputLabel>
                 <Input
                   name="principalInstitutionPersonId"
@@ -864,7 +867,7 @@ class Project extends Component {
                     this.props.setFieldValue('principalInstitutionPersonId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Rechercher administrateur / initiateur"
+                  placeholder= {t('Project Mandating institution person search')}
                   id="react-select-single-principalInstitutionPerson"
                   inputProps={{
                     classes,
@@ -878,7 +881,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="principalInstitutionName">
-                  Nom au début du projet (si différente)
+                    {t('Project Mandating institution name manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -894,7 +897,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="principalInstitutionRespLastName">
-                  Nom administrateur au début du projet (si différente)
+                    {t('Project Mandating institution firstName manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -910,7 +913,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="principalInstitutionRespFirstName">
-                  Prénom administrateur au début du projet (si différente)
+                    {t('Project Mandating institution lastName manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -926,11 +929,11 @@ class Project extends Component {
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="h4">Organisation mandataire </Typography>
+              <Typography component="h4">{t('Project Mandatory institution')} </Typography>
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandatorylInstitutionId">
-                  Nom de l'organisation mandataire
+                    {t('Project Mandatory institution name')}
                 </InputLabel>
 
                 <Input
@@ -943,7 +946,7 @@ class Project extends Component {
                     this.props.setFieldValue('mandataryInstitutionId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Rechercher organisation mandataire"
+                  placeholder= {t('Project Mandatory institution name search')}
                   id="mandatorylInstitutionId"
                   inputProps={{
                     classes,
@@ -957,7 +960,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandataryInstitutionPersonId">
-                  Personne (administrateur / initiateur)
+                    {t('Project Mandatory institution person')}
                 </InputLabel>
                 <Input
                   name="mandataryInstitutionPersonId"
@@ -969,8 +972,8 @@ class Project extends Component {
                     this.props.setFieldValue('mandataryInstitutionPersonId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Rechercher administrateur / initiateur"
-                  id=""
+                  placeholder= {t('Project Mandatory institution person search')}
+                  id="mandataryInstitutionPersonId"
                   inputProps={{
                     classes,
                     name: 'react-select-single',
@@ -983,7 +986,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandataryInstitutionName">
-                  Nom au début du projet (si différente)
+                    {t('Project Mandatory institution name manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -999,7 +1002,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandataryInstitutionRespLastName">
-                  Nom administrateur au début du projet (si différente)
+                    {t('Project Mandatory institution firstName manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -1015,7 +1018,7 @@ class Project extends Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="mandataryInstitutionRespFirstName">
-                  Prénom administrateur au début du projet (si différente)
+                    {t('Project Mandatory institution lastName manuel')}
                 </InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -1185,4 +1188,4 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps, {
   ...projectActions,
   ...thesaurusActions
-})(withErrorHandler(withStyles(styles)(ProjectForm), axios));
+})(withErrorHandler(withStyles(styles)(translate('translations')(ProjectForm)), axios));

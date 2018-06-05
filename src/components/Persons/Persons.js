@@ -9,7 +9,7 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
 import 'react-table/react-table.css';
-
+import { translate, Trans } from 'react-i18next';
 import axios from '../../axios-infofauna';
 import cssPersons from './Persons.css';
 import { personActions } from '../../store/actions';
@@ -132,28 +132,29 @@ class Persons extends Component {
   };
 
   render() {
+    const { t, i18n } = this.props;
     const { classes } = this.props;
     const { data, pages, loading } = this.state;
     return (
       <div className={cssPersons.PersonsContainer}>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Gestion des personnes
+              {t('Person Persons management')}
           </Typography>
           <Typography component="p">
-            Gestion des personnes, ajouter, modifier et supprimer
+              {t('Person Person management, add, edit and delete')}
           </Typography>
 
           <TextField
             id="name"
-            label="Filtrer par nom ou prénom"
+            label=  {t('Person Filter by first or last name')}
             className={classes.textField}
             value={this.state.filtered}
             onChange={this.handleFiltered}
             margin="normal"
           />
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+            <Tooltip id="tooltip-fab" title= {t('Person Add new person')}>
               <Button
                 variant="fab"
                 color="primary"
@@ -178,28 +179,28 @@ class Persons extends Component {
             }}
             columns={[
               {
-                Header: 'Nom',
+                Header:  t('Person Personal information'),
 
                 columns: [
                   {
-                    Header: 'Titre académique',
+                    Header: t('Person Academic title'),
                     accessor: 'titleI18n',
                     sortable: false,
                     maxWidth: 100
                   },
                   {
-                    Header: 'Nom',
+                    Header: t('Person Lastname'),
                     id: 'lastName',
                     accessor: 'lastName',
                     style: { verticalAlign: 'center' }
                   },
                   {
-                    Header: 'Prénom',
+                    Header: t('Person Firstname'),
                     accessor: 'firstName'
                   },
 
                   {
-                    Header: 'Genre',
+                    Header: t('Person Gender'),
                     accessor: 'genderI18n',
                     sortable: false,
                     maxWidth: 100
@@ -208,21 +209,21 @@ class Persons extends Component {
               },
 
               {
-                Header: 'Info',
+                Header: t('Person Address'),
                 columns: [
                   {
-                    Header: 'Pays',
+                    Header: t('Person Country'),
                     accessor: 'countryI18n',
                     sortable: false,
                     maxWidth: 120
                   },
                   {
-                    Header: 'Localité',
+                    Header:  t('Person City'),
                     accessor: 'locality',
                     maxWidth: 150
                   },
                   {
-                    Header: 'E-mail',
+                    Header: t('Person E-mail'),
                     accessor: 'email',
                     maxWidth: 300
                   }
@@ -243,6 +244,13 @@ class Persons extends Component {
               }
             ]}
             filterable={false}
+            previousText={t('Table Previous')}
+            nextText={t('Table Next')}
+            loadingText={t('Table Loading')}
+            noDataText={t('Table No rows found')}
+            pageText={t('Table Page')}
+            ofText={t('Table Of')}
+            rowsText={t('Table Rows')}
           />
         </Paper>
         <br />
@@ -255,4 +263,4 @@ Persons.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default connect(null, { ...personActions })(withStyles(styles)(Persons));
+export default connect(null, { ...personActions })(withStyles(styles)( translate('translations')(Persons)));
