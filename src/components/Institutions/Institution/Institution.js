@@ -273,7 +273,7 @@ class Institution extends Component {
     );
 
     if (
-      !this.props.institution.ongoingFetch &&
+      !this.props.institution.ongoingRequest &&
       (!this.props.institution.data ||
         (this.props.institution.data != null &&
           this.props.institution.data.id != id))
@@ -339,7 +339,7 @@ class Institution extends Component {
       }
 
 
-      if (this.props.institution.ongoingFetch) {
+      if (this.props.institution.ongoingRequest) {
       return (
         <div className="InstitutionContainer">
           <Paper className={classes.root} elevation={4}>

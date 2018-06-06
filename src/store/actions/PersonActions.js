@@ -2,7 +2,7 @@ import axios from '../../axios-infofauna';
 import * as types from './Types';
 
 // actions generators
-const initiateFetchPersonAction = () => ({
+const initiateRequestPersonAction = () => ({
   type: types.INITIATE_FETCH_PERSON
 });
 
@@ -11,9 +11,26 @@ const fetchPersonAction = payload => ({
   payload
 });
 
+const updatePersonAction = () => ({
+    type: types.UPDATE_PERSON
+});
+const addNewPersonAction = () => ({
+    type: types.ADD_PERSON
+});
+
 const errorFecthingPersonAction = payload => ({
   type: types.ERROR_FECTHING_PERSON,
   payload
+});
+
+const errorUpdatingPersonAction = payload => ({
+    type: types.ERROR_UPDATE_PERSON,
+    payload
+});
+
+const errorAddingNewPersonAction = payload => ({
+    type: types.ERROR_ADD_PERSON,
+    payload
 });
 
 
@@ -24,11 +41,25 @@ const fetchPersonAxios = async (id) => {
   return axios.get(url);
 };
 
+const updatePersonAxios = async (id, updatedPerson) => {
+    const url =`/api/persons/${id}`;
+    console.log(`updatePersonAxios url:${url} ,updatedPerson:${JSON.stringify(updatedPerson,null,3)} `);
+    return axios.put(url,updatedPerson);
+};
+
+const addNewPersonAxios = async (person) => {
+    const url =`/api/persons/`;
+    console.log(`addNewPersonAxios url:${JSON.stringify(person,null,3)}`);
+    return axios.post(person);
+};
+
+
+
 
 // actions
 
-const initiateFetchPerson = () => dispatch =>
-  dispatch(initiateFetchPersonAction());
+const initiateRequestPerson = () => dispatch =>
+  dispatch(initiateRequestPersonAction());
 
 const fetchPerson = (id) => async (dispatch, getState) => {
   try {
@@ -42,7 +73,34 @@ const fetchPerson = (id) => async (dispatch, getState) => {
 };
 
 
+const updatePerson = (id, updatedPerson) => async (dispatch, getState) => {
+    try {
+        dispatch(initiateRequestPersonAction());
+        await updatePersonAxios(id,updatedPerson);
+        const updatePersonAction = updatePersonAction();
+        dispatch(updatePersonAction);
+    } catch (e) {
+        dispatch(errorUpdatingPersonAction('error updating person detail'));
+    }
+};
+
+const addNewPerson = (person) => async (dispatch, getState) => {
+    try {
+        dispatch(initiateRequestPersonAction());
+        await addNewPersonAxios(person);
+        const addPersonAction = addNewPersonAction();
+        dispatch(addPersonAction);
+    } catch (e) {
+        dispatch(errorAddingNewPersonAction('error adding new person'));
+    }
+};
+
+
+
+
 export {
-    initiateFetchPerson,
-    fetchPerson
+    initiateRequestPerson,
+    fetchPerson,
+    updatePerson,
+    addNewPerson
 };

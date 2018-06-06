@@ -4,22 +4,22 @@ const initialState = {
   list: [],
   error: null,
   ongoingPruchase: false,
-  ongoingFetch: false
+  ongoingRequest: false
 };
 
 const orderReducer = (state = initialState, action) => {
   switch (action.type) {
     case types.INITIATE_FETCH_ORDERS:
-      return { ...state, ongoingFetch: true };
+      return { ...state, ongoingRequest: true };
     case types.ERROR_LOADING_LIST_ORDERS:
-      return { ...state, error: action.payload, ongoingFetch: false };
+      return { ...state, error: action.payload, ongoingRequest: false };
 
     case types.LIST_ORDERS:
       return {
         ...state,
         list: action.payload,
         error: null,
-        ongoingFetch: false
+        ongoingRequest: false
       };
 
     case types.INITIATE_ORDER_PURCHASE:

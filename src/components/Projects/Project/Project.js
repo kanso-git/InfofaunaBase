@@ -326,7 +326,7 @@ class Project extends Component {
     const { id } = this.props.match.params;
 
     if (
-      !this.props.project.ongoingFetch &&
+      !this.props.project.ongoingRequest &&
       (!this.props.project.data ||
         (this.props.project.data != null && this.props.project.data.id != id))
     ) {
@@ -419,7 +419,7 @@ class Project extends Component {
       }
 
 
-      if (this.props.project.ongoingFetch) {
+      if (this.props.project.ongoingRequest) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>

@@ -15,7 +15,7 @@ class Orders extends Component {
     this.props.loadOrdersList();
   }
   render() {
-    if (this.props.order.ongoingFetch) {
+    if (this.props.order.ongoingRequest) {
       return <Spinner />;
     } else {
       const ordersData = this.props.order.list;

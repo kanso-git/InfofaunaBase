@@ -93,11 +93,12 @@ class Person extends Component {
     const { id } = this.props.match.params;
 
     if (
-      !this.props.person.ongoingFetch &&
+      !this.props.person.ongoingRequest &&
       (!this.props.person.data ||
-        (this.props.person.data != null && this.props.person.data.id != id))
+        (this.props.person.data != null && this.props.person.data.id != id ))
     ) {
-      this.props.initiateFetchPerson();
+      this.setState(()=>({reload:false}));
+      this.props.initiateRequestPerson();
 
       if (!this.props.thesaurus[types.REALM_COUNTRY]) {
         this.props.fetchThesaurus(types.REALM_COUNTRY);
@@ -156,7 +157,7 @@ class Person extends Component {
         auditData={...person.data.auditDTO}
     }
 
-    if (this.props.person.ongoingFetch) {
+    if (this.props.person.ongoingRequest && !this.props.person.data) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
@@ -594,10 +595,12 @@ const PersonForm = withFormik({
     // let's suppose that we do a server validtion call
     //props.initiateLogin();
     //props.login(values);
-    //setSubmitting(false);
+      const { id } = props.match.params;
+      props.updatePerson(id, values);
+      setSubmitting(false);
   },
   isInitialValid: true,
-  validationSchema: object().shape({
+  validationSchema: () => object().shape({
     firstName: string().required(Person_FirstName_is_required),
     lastName: string().required(Person_LastName_is_required),
     genderId: string().required(Person_Gendre_is_required),

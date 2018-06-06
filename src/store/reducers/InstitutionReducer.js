@@ -4,22 +4,22 @@ const initialState = {
   data: null,
   error: null,
   personsList: null,
-  ongoingFetch: false
+  ongoingRequest: false
 };
 
 const institutionReducer = (state = initialState, action) => {
   switch (action.type) {
     case types.INITIATE_FETCH_INSTITUTION:
-      return { ...state, ongoingFetch: true };
+      return { ...state, ongoingRequest: true };
     case types.ERROR_FECTHING_INSTITUTION:
-      return { ...state, error: action.payload, ongoingFetch: false };
+      return { ...state, error: action.payload, ongoingRequest: false };
     case types.FETCH_INSTITUTION:
       return {
         ...state,
         data: action.payload.person,
         personsList: action.payload.personsList,
         error: null,
-        ongoingFetch: false
+        ongoingRequest: false
       };
 
     default:
