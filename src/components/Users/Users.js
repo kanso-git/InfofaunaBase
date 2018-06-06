@@ -8,6 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
+import { translate, Trans } from 'react-i18next';
 
 import axios from '../../axios-infofauna';
 import cssUsers from './Users.css';
@@ -129,6 +130,7 @@ class Users extends Component {
 
   render() {
     const { classes } = this.props;
+    const {t,i18n } = this.props;
     const { data, pages, loading } = this.state;
     return (
       <div className={cssUsers.PersonsContainer}>
@@ -250,13 +252,13 @@ class Users extends Component {
               }
             ]}
             filterable={false}
-            previousText="Previous"
-            nextText="Next"
-            loadingText="Chargement..."
-            noDataText="No rows found"
-            pageText="Page"
-            ofText="of"
-            rowsText="rows"
+            previousText={t('Table Previous')}
+            nextText={t('Table Next')}
+            loadingText={t('Table Loading')}
+            noDataText={t('Table No rows found')}
+            pageText={t('Table Page')}
+            ofText={t('Table Of')}
+            rowsText={t('Table Rows')}
           />
         </Paper>
         <br />
@@ -269,4 +271,4 @@ Users.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(Users);
+export default withStyles(styles)(translate('translations')(Users));

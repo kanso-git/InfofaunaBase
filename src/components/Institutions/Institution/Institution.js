@@ -37,6 +37,7 @@ import Chip from '@material-ui/core/Chip';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 import Audit from "../../Audit/Audit";
+import { translate, Trans } from 'react-i18next';
 
 let suggestionsPerson = [];
 
@@ -70,7 +71,7 @@ function SelectWrapped(props) {
   return (
     <Select
       optionComponent={Option}
-      noResultsText={<Typography>{'No results found'}</Typography>}
+      noResultsText={<Typography>{AUTOCOMPLET_No_results_found}</Typography>}
       arrowRenderer={arrowProps => {
         return arrowProps.isOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />;
       }}
@@ -252,6 +253,13 @@ const styles = theme => ({
   }
 });
 
+let AUTOCOMPLET_No_results_found ;
+let Institution_Name_is_required;
+let Institution_Acronym_is_required;
+let Institution_Phone_format_is_invalid;
+let Institution_Email_format_is_invalid;
+let Institution_Url_format_is_invalid;
+
 class Institution extends Component {
   state = {
     loadingProgress: false,
@@ -313,6 +321,17 @@ class Institution extends Component {
       thesaurus,
         institution
     } = this.props;
+      const {t,i18n } = this.props;
+      AUTOCOMPLET_No_results_found  = t('AUTOCOMPLET No results found');
+
+      Institution_Name_is_required =t('Institution Name is required');
+      Institution_Acronym_is_required =t('Institution Acronym is required');
+      Institution_Phone_format_is_invalid =t('Institution Phone format is not valid');
+      Institution_Email_format_is_invalid =t('Institution Email format is not valid');
+      Institution_Url_format_is_invalid =t('Institution Url format is not valid');
+
+
+
 
       let auditData={};
       if(institution.data){
@@ -325,7 +344,7 @@ class Institution extends Component {
         <div className="InstitutionContainer">
           <Paper className={classes.root} elevation={4}>
             <Typography variant="headline" component="h3">
-              Chrargement institution ...
+                {t('Institution Loading')}
             </Typography>
             <br />
             <br />
@@ -343,15 +362,15 @@ class Institution extends Component {
       <div className="InstitutionContainer">
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            <NavLink to="/persons" className={classes.backLink}>
-              Institutions
+            <NavLink to="/institutions" className={classes.backLink}>
+                {t('Institution Institutions')}
             </NavLink>{' '}
             >
-            <span className={classes.actualSite}> Détail de l'instutition</span>
+            <span className={classes.actualSite}> {t('Institution Detail')}</span>
           </Typography>
 
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="enable edit">
+            <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
                 control={
                   <Switch
@@ -361,7 +380,7 @@ class Institution extends Component {
                     color="primary"
                   />
                 }
-                label="Enable edit mode"
+                label={t('Form Enable edit mode')}
               />
             </Tooltip>
           </div>
@@ -369,13 +388,13 @@ class Institution extends Component {
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Nom et abbréviation</Typography>
+              <Typography component="p">{t('Institution Name and acronym')}</Typography>
 
               <FormControl
                 className={classes.formControl}
                 error={touched.acronym && errors.acronym ? true : false}
               >
-                <InputLabel htmlFor="acronym">*Abbréviation</InputLabel>
+                <InputLabel htmlFor="acronym">*{t('Institution Acronym')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="acronym"
@@ -398,7 +417,7 @@ class Institution extends Component {
                 className={classes.formControl}
                 error={touched.name && errors.name ? true : false}
               >
-                <InputLabel htmlFor="name">*Nom</InputLabel>
+                <InputLabel htmlFor="name">*{t('Institution Name')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="name"
@@ -420,13 +439,13 @@ class Institution extends Component {
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="h4">Adresse et contact</Typography>
+              <Typography component="h4">{t('Institution Address and contact')}</Typography>
 
               <FormControl
                 className={classes.formControl}
                 error={touched.address1 && errors.address1 ? true : false}
               >
-                <InputLabel htmlFor="address1">Rue et numéro</InputLabel>
+                <InputLabel htmlFor="address1">{t('Institution Street and number')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="address1"
@@ -443,7 +462,7 @@ class Institution extends Component {
                 className={classes.formControl}
                 error={touched.address2 && errors.address2 ? true : false}
               >
-                <InputLabel htmlFor="address2">Complément</InputLabel>
+                <InputLabel htmlFor="address2">{t('Institution Additional information')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="address2"
@@ -457,7 +476,7 @@ class Institution extends Component {
               </FormControl>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="zipCode">Code postal</InputLabel>
+                <InputLabel htmlFor="zipCode">{t('Institution Postal code')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="zipCode"
@@ -491,7 +510,7 @@ class Institution extends Component {
                   id="select-pays-native"
                   name="countryId"
                   select
-                  label="*Pays"
+                  label={t('Institution Country')}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.countryId}
@@ -506,7 +525,7 @@ class Institution extends Component {
                 >
                   {thesaurus[types.REALM_COUNTRY] ? (
                     thesaurus[types.REALM_COUNTRY].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -516,8 +535,8 @@ class Institution extends Component {
                 </TextField>
               </FormControl>
 
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="phone">Téléphone</InputLabel>
+              <FormControl className={classes.formControl}  error={touched.phone && errors.phone ? true : false}>
+                <InputLabel htmlFor="phone">{t('Institution Phone')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="phone"
@@ -528,10 +547,14 @@ class Institution extends Component {
                   onBlur={handleBlur}
                   value={values.phone}
                 />
+                  {touched.phone &&
+                  errors.phone && (
+                      <FormHelperText id="phone-text">{errors.phone}</FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="mobilePhone">Fax</InputLabel>
+              <FormControl className={classes.formControl}  error={touched.fax && errors.fax ? true : false}>
+                <InputLabel htmlFor="mobilePhone">{t('Institution Fax')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="fax"
@@ -542,10 +565,14 @@ class Institution extends Component {
                   onBlur={handleBlur}
                   value={values.fax}
                 />
+                  {touched.fax &&
+                  errors.fax && (
+                      <FormHelperText id="fax-text">{errors.fax}</FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="url">Url</InputLabel>
+              <FormControl className={classes.formControl} error={touched.url && errors.url ? true : false}>
+                <InputLabel htmlFor="url">{t('Institution Url')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="url"
@@ -556,16 +583,22 @@ class Institution extends Component {
                   onBlur={handleBlur}
                   value={values.url}
                 />
+                  {touched.url &&
+                  errors.url && (
+                      <FormHelperText id="url-text">{errors.url}</FormHelperText>
+                  )}
               </FormControl>
+
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
-              <Typography component="p">Personne responsable</Typography>
+              <Typography component="p">{t('Institution Person in charge')}</Typography>
 
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="personInChargeId">*Personne</InputLabel>
+                <InputLabel htmlFor="personInChargeId">*{t('Institution Person fulName')}</InputLabel>
                 <Input
                   name="personInChargeId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.personInChargeId}
                   className={classes.textField}
@@ -573,7 +606,7 @@ class Institution extends Component {
                     this.props.setFieldValue('personInChargeId', b)
                   }
                   onBlur={handleBlur}
-                  placeholder="Search person In ChargeId"
+                  placeholder={t('Institution Person fulName search')}
                   id="react-select-single"
                   inputProps={{
                     classes,
@@ -591,7 +624,7 @@ class Institution extends Component {
                   id="select-personInChargeFunction-native"
                   name="personInChargeFunctionId"
                   select
-                  label="*Fonction dans l'institution"
+                  label={t('Institution Person function')}
                   className={classes.textField}
                   value={values.personInChargeFunctionId}
                   onChange={handleChange}
@@ -605,7 +638,7 @@ class Institution extends Component {
                 >
                   {thesaurus[types.REALM_FUNCTION] ? (
                     thesaurus[types.REALM_FUNCTION].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -628,7 +661,7 @@ class Institution extends Component {
                   size="small"
                 >
                   <Save className={classNames(classes.rightIcon)} />
-                  Save
+                    {t('Institution Save')}
                 </Button>
 
                 <Button
@@ -636,7 +669,7 @@ class Institution extends Component {
                   variant="raised"
                   color="secondary"
                 >
-                  Delete
+                    {t('Institution Delete')}
                   <Delete className={classes.rightIcon} />
                 </Button>
               </div>
@@ -700,21 +733,18 @@ const InstitutionForm = withFormik({
   },
   handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
     // let's suppose that we do a server validtion call
+      console.log(JSON.stringify(values, null,3));
     //props.initiateLogin();
     //props.login(values);
-    //setSubmitting(false);
+    setSubmitting(false);
   },
   isInitialValid: true,
-  validationSchema: object().shape({
-    acronym: string().required('Abbréviation is required ..'),
-    name: string().required('Nom is required ..'),
-    genderId: string().required('gender is required ..'),
-    languageId: string().required('language is required ..'),
-    countryId: string().required('country is required ..'),
-    proPhone: string().min(10, 'Phone must be 10 or longer'),
-    mobilePhone: string().min(10, 'Phone must be 10 or longer'),
-    privatePhone: string().min(10, 'Phone must be 10 or longer'),
-    email: string().email('Email is not valid !')
+  validationSchema: () =>object().shape({
+    acronym: string().required(Institution_Acronym_is_required),
+    name: string().required(Institution_Name_is_required),
+    phone: string().min(10, Institution_Phone_format_is_invalid),
+    fax: string().min(10, Institution_Phone_format_is_invalid),
+    url: string().url(Institution_Url_format_is_invalid)
   })
 })(Institution);
 
@@ -729,4 +759,4 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps, {
   ...institutionActions,
   ...thesaurusActions
-})(withErrorHandler(withStyles(styles)(InstitutionForm), axios));
+})(withErrorHandler(withStyles(styles)(translate('translations')(InstitutionForm)), axios));

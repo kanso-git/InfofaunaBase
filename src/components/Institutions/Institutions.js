@@ -11,6 +11,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 import axios from '../../axios-infofauna';
 import cssUsers from './Institutions.css';
+import { translate, Trans } from 'react-i18next';
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -120,28 +121,29 @@ class Institutions extends Component {
   };
 
   render() {
+    const {t,i18n } = this.props;
     const { classes } = this.props;
     const { data, pages, loading } = this.state;
     return (
       <div className={cssUsers.PersonsContainer}>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Gestion des institutions
+              {t('Institution Institutions management')}
           </Typography>
           <Typography component="p">
-            Gestion des Institutions, ajouter, modifier et supprimer
+              {t('Institution Institutions management, add, edit and delete')}
           </Typography>
 
           <TextField
             id="name"
-            label="Filtrer par Abbréviation/Nom"
+            label={t('Institution Filter by acronym or name')}
             className={classes.textField}
             value={this.state.filtered}
             onChange={this.handleFiltered}
             margin="normal"
           />
           <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title="Ajouter une nouvelle personne">
+            <Tooltip id="tooltip-fab" title={t('Institution Add new institution')}>
               <Button
                 variant="fab"
                 color="primary"
@@ -166,16 +168,16 @@ class Institutions extends Component {
             }}
             columns={[
               {
-                Header: 'Institution',
+                Header: t('Institution Institutions'),
 
                 columns: [
                   {
-                    Header: 'Abbréviation',
+                    Header: t('Institution Acronym'),
                     accessor: 'acronym',
                     maxWidth: 150
                   },
                   {
-                    Header: 'Nom',
+                    Header: t('Institution Name'),
                     id: 'name',
                     accessor: 'name'
                   }
@@ -183,16 +185,16 @@ class Institutions extends Component {
               },
 
               {
-                Header: 'Adresse',
+                Header: t('Institution Address'),
                 columns: [
                   {
-                    Header: 'Pays',
+                    Header: t('Institution Country'),
                     accessor: 'countryI18n',
                     sortable: false,
                     maxWidth: 120
                   },
                   {
-                    Header: 'Localité',
+                    Header:  t('Institution City'),
                     accessor: 'locality',
                     maxWidth: 150
                   }
@@ -214,6 +216,13 @@ class Institutions extends Component {
               }
             ]}
             filterable={false}
+            previousText={t('Table Previous')}
+            nextText={t('Table Next')}
+            loadingText={t('Table Loading')}
+            noDataText={t('Table No rows found')}
+            pageText={t('Table Page')}
+            ofText={t('Table Of')}
+            rowsText={t('Table Rows')}
           />
         </Paper>
         <br />
@@ -226,4 +235,4 @@ Institutions.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(Institutions);
+export default withStyles(styles)(translate('translations')(Institutions));

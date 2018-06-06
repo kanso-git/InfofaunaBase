@@ -31,7 +31,8 @@ const styles = theme => ({
             'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
     },
     card: {
-        padding: 10
+        padding: 10,
+        maxWidth:500
     },
     media: {
         height: 0,
@@ -56,9 +57,9 @@ const Dashboard = (props) => {
     const {classes} = props;
     return (
 
-        <Grid>
-            <Row>
-                <Col md={4}>
+        <Grid >
+            <Row  >
+                <Col sm={4}>
                     <Card className={classes.card}>
                         <Typography gutterBottom variant="headline" component="h2">
                             MIDAT
@@ -88,7 +89,7 @@ const Dashboard = (props) => {
                         </CardActions>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col sm={4}  >
                     <Card className={classes.card}>
                         <Typography gutterBottom variant="headline" component="h2">
                             MIDAT-Sources
@@ -113,7 +114,7 @@ const Dashboard = (props) => {
                         </CardActions>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col sm={4}  >
                     <Card className={classes.card}>
                         <CardMedia
                             className={classes.media}

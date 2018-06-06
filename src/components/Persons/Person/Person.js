@@ -216,10 +216,10 @@ class Person extends Component {
                   id="select-title-native"
                   select
                   label= {t('Person Academic title')}
-                  name="title"
+                  name="titleId"
                   className={classes.textField}
                   style={{ width: 150 }}
-                  value={values.title}
+                  value={values.titleId}
                   onChange={handleChange}
                   SelectProps={{
                     native: true,
@@ -232,7 +232,7 @@ class Person extends Component {
                   <option value="-1"> </option>
                   {thesaurus[types.REALM_TITLE] &&
                     thesaurus[types.REALM_TITLE].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))}
@@ -306,7 +306,7 @@ class Person extends Component {
                 >
                   {thesaurus[types.REALM_GENDER] ? (
                     thesaurus[types.REALM_GENDER].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -337,7 +337,7 @@ class Person extends Component {
                 >
                   {thesaurus[types.REALM_LANGUAGE] ? (
                     thesaurus[types.REALM_LANGUAGE].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -451,7 +451,7 @@ class Person extends Component {
                 >
                   {thesaurus[types.REALM_COUNTRY] ? (
                     thesaurus[types.REALM_COUNTRY].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -563,14 +563,14 @@ const PersonForm = withFormik({
     const { firstName, lastName, username, password, person } = props;
 
     return {
-      title: person.data && person.data.titleId ? person.data.titleId : '',
+      titleId: person.data && person.data.titleId ? person.data.titleId : '',
       firstName:
         person.data && person.data.firstName ? person.data.firstName : '',
       lastName: person.data && person.data.lastName ? person.data.lastName : '',
 
-      genderId: person.data && person.data.genderId ? person.data.genderId : '',
+      genderId: person.data && person.data.genderId ? person.data.genderId : -1,
       languageId:
-        person.data && person.data.languageId ? person.data.languageId : '',
+        person.data && person.data.languageId ? person.data.languageId : -1,
       dateOfBirth:
         person.data && person.data.dateOfBirth
           ? moment(person.data.dateOfBirth).format('YYYY-MM-DD')
@@ -590,6 +590,7 @@ const PersonForm = withFormik({
     };
   },
   handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
+    console.log(JSON.stringify(values, null,3));
     // let's suppose that we do a server validtion call
     //props.initiateLogin();
     //props.login(values);

@@ -41,7 +41,6 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import MaskedInput from 'react-text-mask';
 import NumberFormat from 'react-number-format';
 import Audit from "../../Audit/Audit";
-
 let suggestionsProject = [];
 let suggestionsPrincipalInstitution = [];
 let suggestionsPrincipalInstitutionPerson = [];
@@ -55,7 +54,6 @@ class Option extends React.Component {
 
   render() {
     const { children, isFocused, isSelected, onFocus } = this.props;
-
     return (
       <MenuItem
         onFocus={onFocus}
@@ -314,6 +312,11 @@ const styles = theme => ({
 });
 
 let AUTOCOMPLET_No_results_found ;
+let Project_CodeIFF_is_required ;
+let Project_Name_is_required;
+let Project_Url_format_is_not_valid;
+
+
 class Project extends Component {
   state = {
     enableEditMode: false
@@ -406,6 +409,10 @@ class Project extends Component {
     } = this.props;
 
       AUTOCOMPLET_No_results_found  = t('AUTOCOMPLET No results found');
+      Project_CodeIFF_is_required = t('Project Code IFF is required');
+      Project_Name_is_required = t('Project Name  is required');
+      Project_Url_format_is_not_valid = t('Project Url format is not valid');
+
       let auditData={};
       if(project.data){
           auditData={...project.data.auditDTO}
@@ -504,7 +511,7 @@ class Project extends Component {
                 className={classes.formControl}
                 error={touched.designation && errors.designation ? true : false}
               >
-                <InputLabel htmlFor="designation">*{t('Project Description')}</InputLabel>
+                <InputLabel htmlFor="designation">*{t('Project Name')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
                   id="designation"
@@ -527,6 +534,7 @@ class Project extends Component {
                 <InputLabel htmlFor="projectProjectId">{t('Project Parent project')}</InputLabel>
                 <Input
                   name="projectProjectId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.projectProjectId}
                   className={classes.textField}
@@ -550,6 +558,7 @@ class Project extends Component {
                 control={
                   <Checkbox
                     name="voluntaryWork"
+                    disabled={!this.state.enableEditMode}
                     checked={values.voluntaryWor}
                     onChange={handleChange}
                     classes={{
@@ -619,7 +628,7 @@ class Project extends Component {
                   <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETTYPE] ? (
                     thesaurus[types.REALM_PROJETTYPE].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -650,7 +659,7 @@ class Project extends Component {
                   <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETORIG] ? (
                     thesaurus[types.REALM_PROJETORIG].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -681,7 +690,7 @@ class Project extends Component {
                   <option value="-1"> </option>
                   {thesaurus[types.REALM_PROJETLIMA] ? (
                     thesaurus[types.REALM_PROJETLIMA].map(option => (
-                      <option key={option.id} value={option.code}>
+                      <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
@@ -833,6 +842,7 @@ class Project extends Component {
                 </InputLabel>
                 <Input
                   name="principalInstitutionId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.principalInstitutionId}
                   className={classes.textField}
@@ -859,6 +869,7 @@ class Project extends Component {
                 </InputLabel>
                 <Input
                   name="principalInstitutionPersonId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.principalInstitutionPersonId}
                   className={classes.textField}
@@ -938,6 +949,7 @@ class Project extends Component {
 
                 <Input
                   name="mandatorylInstitutionId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.mandataryInstitutionId}
                   className={classes.textField}
@@ -964,6 +976,7 @@ class Project extends Component {
                 </InputLabel>
                 <Input
                   name="mandataryInstitutionPersonId"
+                  disabled={!this.state.enableEditMode}
                   inputComponent={SelectWrapped}
                   value={values.mandataryInstitutionPersonId}
                   className={classes.textField}
@@ -1164,16 +1177,17 @@ const ProjectForm = withFormik({
     };
   },
   handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
+      console.log(JSON.stringify(values, null,3));
     // let's suppose that we do a server validtion call
     //props.initiateLogin();
     //props.login(values);
     //setSubmitting(false);
   },
   isInitialValid: true,
-  validationSchema: object().shape({
-    code: string().required('Code info fauna is required ..'),
-    designation: string().required('Projet name  is required ..'),
-    url: string().url('url is not valide')
+  validationSchema:()=> object().shape({
+    code: string().required(Project_CodeIFF_is_required),
+    designation: string().required(Project_Name_is_required),
+    url: string().url(Project_Url_format_is_not_valid)
   })
 })(Project);
 
