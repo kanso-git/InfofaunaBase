@@ -14,6 +14,8 @@ import axios from '../../axios-infofauna';
 import cssProjects from './Projects.css';
 import { projectActions } from '../../store/actions';
 import { connect } from 'react-redux';
+import * as types from '../../store/actions/Types';
+const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -52,6 +54,18 @@ class Projects extends Component {
     searchInstitutionName: ''
   };
 
+    componentDidMount(){
+        this.notificationInput = React.createRef();
+        if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
+            const { t } = this.props;
+            setTimeout(()=>this.addNofification(
+                t('Notification Body delete success'),
+                t('Notification Title success'),
+                'success'
+            ), 200);
+        }
+    }
+
   getParamByNameFormUrl = (name, url) => {
     if (
       (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
@@ -65,6 +79,21 @@ class Projects extends Component {
     this.props.history.push('/projects/' + id);
   };
 
+    handleNew = () => {
+        this.props.prepareForm();
+        this.props.history.push('/projects/new');
+    };
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
   handleFiltered = (key, e) => {
     const filtered = e.target.value;
     this.filtered = { [key]: filtered };
@@ -180,6 +209,7 @@ class Projects extends Component {
                 color="primary"
                 aria-label="add"
                 className={classes.button}
+                onClick={this.handleNew}
               >
                 <AddIcon />
               </Button>
@@ -271,7 +301,10 @@ class Projects extends Component {
 Projects.propTypes = {
   classes: PropTypes.object.isRequired
 };
+const mapStateToProps =(state) => ({
+    opreationType: state.project.opreationType
+})
 
-export default connect(null, { ...projectActions })(
+export default connect(mapStateToProps, { ...projectActions })(
   withStyles(styles)(translate('translations')(Projects))
 );

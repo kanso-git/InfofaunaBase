@@ -44,14 +44,18 @@ const AppRouter = props => {
                 <PrivateRoute path="/persons/new" exact component={Person}/>
                 <PrivateRoute path="/persons/:id" component={Person}/>
 
+                <PrivateRoute path="/projects" exact component={Projects}/>
+                <PrivateRoute path="/projects/new" exact component={Project}/>
                 <PrivateRoute path="/projects/:id" component={Project}/>
-                <PrivateRoute path="/projects" component={Projects}/>
 
+                <PrivateRoute path="/institutions" exact component={Institutions}/>
+                <PrivateRoute path="/institutions/new" exact component={Institution}/>
                 <PrivateRoute path="/institutions/:id" component={Institution}/>
-                <PrivateRoute path="/institutions" component={Institutions}/>
+
 
                 <PrivateRoute path="/users" component={Users}/>
-                <PrivateRoute path="/tables" component={Table}/>
+
+
                 <PrivateRoute path="/" exact component={Dashboard}/>
 
                 {/*

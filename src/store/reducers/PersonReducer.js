@@ -27,6 +27,7 @@ const personReducer = (state = initialState, action) => {
             };
         case types.ADD_PERSON:
         case types.UPDATE_PERSON:
+        case types.DELETE_PERSON:
             return {...state, ongoingRequest: false,  error: null,opreationType:action.payload};
         default:
             return state;

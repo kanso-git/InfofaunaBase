@@ -10,21 +10,26 @@ const fetchPersonAction = payload => ({
   type: types.FETCH_PERSON,
   payload
 });
+
 const prepareFormAction = () =>({
     type: types.PREPARE_FORM_FOR_ADD
 })
+
 const updatePersonAction =() => ({
     type: types.UPDATE_PERSON,
     payload:types.MODIFY_OPREATION_TYPE
 });
+
 const addNewPersonAction = () => ({
     type: types.ADD_PERSON,
     payload:types.ADD_OPREATION_TYPE
 });
+
 const deletePersonAction =() => ({
-    type: types.UPDATE_PERSON,
+    type: types.DELETE_PERSON,
     payload:types.DELETE_OPREATION_TYPE
 });
+
 const errorFecthingPersonAction = payload => ({
   type: types.ERROR_FECTHING_PERSON,
   payload
@@ -115,8 +120,7 @@ const deletePerson = (id) => async (dispatch, getState) => {
     }
 };
 
-const prepareForm  = () => dispatch =>
-    dispatch(prepareFormAction());
+const prepareForm  = () => dispatch => dispatch(prepareFormAction());
 
 
 

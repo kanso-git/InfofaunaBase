@@ -41,6 +41,13 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import MaskedInput from 'react-text-mask';
 import NumberFormat from 'react-number-format';
 import Audit from "../../Audit/Audit";
+import Dialog from '../../Dialog/Dialog';
+const NotificationSystem = require('react-notification-system');
+
+const emptySuggestion={
+    value: '',
+    label: ''
+}
 let suggestionsProject = [];
 let suggestionsPrincipalInstitution = [];
 let suggestionsPrincipalInstitutionPerson = [];
@@ -323,42 +330,98 @@ class Project extends Component {
   };
 
   componentDidMount() {
+    this.notificationInput = React.createRef();
     const { id } = this.props.match.params;
 
-    if (
-      !this.props.project.ongoingRequest &&
-      (!this.props.project.data ||
-        (this.props.project.data != null && this.props.project.data.id != id))
-    ) {
-      this.props.initiateFetchProject();
-      if (!this.props.thesaurus[types.REALM_PROJETTYPE]) {
-        this.props.fetchThesaurus(types.REALM_PROJETTYPE);
+      if (id && !this.props.project.ongoingRequest && this.isNotTheSame()) {
+          this.props.initiateRequestProject();
+          this.loadAdditionalData();
+          this.props.loadAdditionalDataProject();
+          this.props.fetchProject(id);
+      }else if(!id){
+          this.setState(()=>({
+              enableEditMode: true,
+              loading: true
+          }))
+          this.loadAdditionalData();
+          this.props.loadAdditionalDataProject();
+          this.setState(()=>({
+              loading: false
+          }))
       }
-      if (!this.props.thesaurus[types.REALM_PROJETORIG]) {
-        this.props.fetchThesaurus(types.REALM_PROJETORIG);
-      }
-      if (!this.props.thesaurus[types.REALM_PROJETLIMA]) {
-        this.props.fetchThesaurus(types.REALM_PROJETLIMA);
-      }
-
-      console.log('calling  fetchProject >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-      this.props.fetchProject(id);
-    }
   }
+    loadAdditionalData = ()=> {
+        if (!this.props.thesaurus[types.REALM_PROJETTYPE]) {
+            this.props.fetchThesaurus(types.REALM_PROJETTYPE);
+        }
+        if (!this.props.thesaurus[types.REALM_PROJETORIG]) {
+            this.props.fetchThesaurus(types.REALM_PROJETORIG);
+        }
+        if (!this.props.thesaurus[types.REALM_PROJETLIMA]) {
+            this.props.fetchThesaurus(types.REALM_PROJETLIMA);
+        }
+    }
 
+    isNotTheSame =()=>{
+        if(this.props.project.data ){
+            const { id } = this.props.match.params;
+            if(this.props.project.data.id === parseInt(id)){
+                return false
+            }
+        }
+        return true;
+    }
+
+    componentWillReceiveProps(nextProps){
+        console.log('componentWillReceiveProps .............');
+        if( nextProps.project.opreationType === types.ADD_OPREATION_TYPE ){
+            const {id} = nextProps.match.params;
+            if(id && id != this.props.match.params.id){
+                this.props.fetchProject(id);
+            }else if(!id){
+                const { t } = this.props;
+                this.addNofification(
+                    t('Notification Body add success'),
+                    t('Notification Title success'),
+                    'success');
+            }
+
+        }
+
+        if(nextProps.project.opreationType === types.MODIFY_OPREATION_TYPE){
+            const { t } = this.props;
+            this.addNofification(
+                t('Notification Body modify success'),
+                t('Notification Title success'),
+                'success')
+        }
+    }
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
   handleEnableEditMode = () => {
     this.setState(prevState => ({ enableEditMode: !prevState.enableEditMode }));
   };
-  handleClickShowPassword = () => {
-    this.setState({ showPassword: !this.state.showPassword });
-  };
 
+    handleDelete = (id) =>{
+        this.props.deleteProject(id);
+        setTimeout(()=>this.props.history.push('/projects'), 200);
+    }
   render() {
     if (this.props.project.projectsList) {
       suggestionsProject = this.props.project.projectsList.map(suggestion => ({
         value: suggestion.id,
         label: suggestion.code
       }));
+        suggestionsProject =[emptySuggestion,...suggestionsProject]
     }
 
     if (this.props.project.personsList) {
@@ -444,9 +507,11 @@ class Project extends Component {
           <Typography variant="headline" component="h3">
             <NavLink to="/projects" className={classes.backLink}>
                 {t('Project Projects')}
-            </NavLink>{' '}
+            </NavLink>
             >
-            <span className={classes.actualSite}>  {t('Project Project Detail')}</span>
+              {this.props.match.params.id ?
+                  <span className={classes.actualSite}> {t('Project Project Detail')}</span>
+                  :  <span className={classes.actualSite}> {t('Project Project New')}</span> }
           </Typography>
 
           <div style={{ float: 'right' }}>
@@ -464,7 +529,7 @@ class Project extends Component {
               />
             </Tooltip>
           </div>
-            <Audit {...auditData}/>
+            { this.props.match.params.id ?  <Audit {...auditData}/> :''}
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
@@ -1048,31 +1113,40 @@ class Project extends Component {
 
             <br />
 
-            {this.state.enableEditMode && (
-              <div>
-                <Button
-                  className={classes.button}
-                  variant="raised"
-                  type="submit"
-                  disabled={isSubmitting || !isValid}
-                  size="small"
-                >
-                  <Save className={classNames(classes.rightIcon)} />
-                  Save
-                </Button>
+              {this.state.enableEditMode && (
+                  <div style={{display:'flex',justifyContent:'flex-end'}}>
+                      <Button
+                          className={classes.button}
+                          variant="raised"
+                          type="submit"
+                          disabled={isSubmitting || !isValid}
+                          size="small"
+                      >
+                          <Save className={classNames(classes.rightIcon)} />
+                          &nbsp; &nbsp;{t('Project Save')}
+                      </Button>
+                      { this.props.match.params.id
+                          ?
+                          <Button
+                              className={classes.button}
+                              variant="raised"
+                              color="secondary"
+                              onClick={() => this.setState(()=>({dialog: true})) }
+                          >
+                              {t('Project Delete')}
+                              <Delete className={classes.rightIcon} />
+                          </Button> :
+                          ''
+                      }
 
-                <Button
-                  className={classes.button}
-                  variant="raised"
-                  color="secondary"
-                >
-                  Delete
-                  <Delete className={classes.rightIcon} />
-                </Button>
-              </div>
-            )}
+                  </div>
+              )}
           </Form>
         </Paper>
+          <NotificationSystem ref={this.notificationInput} />
+          {this.state.dialog ?
+              <Dialog handleClose={() => this.setState(()=>({dialog: false})) } handleDelete={()=> this.handleDelete(this.props.match.params.id)}/> : null
+          }
       </div>
     );
   }
@@ -1092,7 +1166,7 @@ const ProjectForm = withFormik({
       projectProjectId:
         project.data && project.data.projectProjectId
           ? project.data.projectProjectId
-          : -1,
+          : '',
       voluntaryWork:
         project.data && project.data.voluntaryWork
           ? project.data.voluntaryWork
@@ -1105,15 +1179,15 @@ const ProjectForm = withFormik({
       projectTypeId:
         project.data && project.data.projectTypeId
           ? project.data.projectTypeId
-          : -1,
+          : '',
       projectOriginId:
         project.data && project.data.projectOriginId
           ? project.data.projectOriginId
-          : -1,
+          : '',
       projectLimaId:
         project.data && project.data.projectLimaId
           ? project.data.projectLimaId
-          : -1,
+          : '',
       debutJour:
         project.data && project.data.debutJour ? project.data.debutJour : '',
       debutMois:
@@ -1132,22 +1206,22 @@ const ProjectForm = withFormik({
       principalInstitutionId:
         project.data && project.data.principalInstitutionId
           ? project.data.principalInstitutionId
-          : -1,
+          : '',
 
       principalInstitutionPersonId:
         project.data && project.data.principalInstitutionPersonId
           ? project.data.principalInstitutionPersonId
-          : -1,
+          : '',
 
       mandataryInstitutionId:
         project.data && project.data.mandataryInstitutionId
           ? project.data.mandataryInstitutionId
-          : -1,
+          : '',
 
       mandataryInstitutionPersonId:
         project.data && project.data.mandataryInstitutionPersonId
           ? project.data.mandataryInstitutionPersonId
-          : -1,
+          : '',
 
       principalInstitutionName:
         project.data && project.data.principalInstitutionName
@@ -1176,14 +1250,22 @@ const ProjectForm = withFormik({
           : ''
     };
   },
-  handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-      console.log(JSON.stringify(values, null,3));
-    // let's suppose that we do a server validtion call
-    //props.initiateLogin();
-    //props.login(values);
-    //setSubmitting(false);
-  },
-  isInitialValid: true,
+
+    async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
+        console.log(JSON.stringify(values, null,3));
+        if(props.match.params.id){
+            const { id } = props.match.params;
+            await props.updateProject(id, values);
+            await props.fetchProject(id);
+            setSubmitting(false);
+        }else{
+            const response= await props.addNewProject(values);
+            setTimeout(()=>props.history.push(response.headers.location), 200);
+        }
+
+    },
+
+    isInitialValid: (props)=> props.match.params.id ? true:false,
   validationSchema:()=> object().shape({
     code: string().required(Project_CodeIFF_is_required),
     designation: string().required(Project_Name_is_required),
