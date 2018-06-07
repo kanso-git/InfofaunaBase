@@ -82,16 +82,36 @@ const fetchInstitutionsListAxios = async () => {
 
 const updateProjectAxios = async (id, updatedProject) => {
     const url = `/api/projects/${id}`;
+    prepareDataHelper(updatedProject)
     console.log(`updateProjectAxios url:${url} ,updatedProject:${JSON.stringify(updatedProject, null, 3)} `);
     return axios.put(url, updatedProject);
 };
 
 const addNewProjectAxios = async (project) => {
     const url = `/api/projects/`;
+    prepareDataHelper(project)
     console.log(`addNewProjectAxios url:${JSON.stringify(project, null, 3)}`);
     return axios.post(url, project);
 };
 
+const prepareDataHelper = (project) =>{
+    if(project.projectProjectId === -1){
+        project.projectProjectId = null;
+    }
+    if(project.principalInstitutionId === -1){
+        project.principalInstitutionId = null;
+    }
+    if(project.principalInstitutionPersonId === -1){
+        project.principalInstitutionPersonId = null;
+    }
+    if(project.mandataryInstitutionId === -1){
+        project.mandataryInstitutionId = null;
+    }
+    if(project.mandataryInstitutionPersonId === -1){
+        project.mandataryInstitutionPersonId = null;
+    }
+    return project
+}
 
 const deleteProjectAxios = (id) => {
     const url = `/api/projects/${id}`;

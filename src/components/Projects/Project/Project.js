@@ -44,10 +44,7 @@ import Audit from "../../Audit/Audit";
 import Dialog from '../../Dialog/Dialog';
 const NotificationSystem = require('react-notification-system');
 
-const emptySuggestion={
-    value: '',
-    label: ''
-}
+
 let suggestionsProject = [];
 let suggestionsPrincipalInstitution = [];
 let suggestionsPrincipalInstitutionPerson = [];
@@ -421,7 +418,9 @@ class Project extends Component {
         value: suggestion.id,
         label: suggestion.code
       }));
-        suggestionsProject =[emptySuggestion,...suggestionsProject]
+      if(this.props.project.data && this.props.project.data.id){
+          debugger;
+      }
     }
 
     if (this.props.project.personsList) {
@@ -690,7 +689,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
-                  <option value="-1"> </option>
+                  <option value=""> </option>
                   {thesaurus[types.REALM_PROJETTYPE] ? (
                     thesaurus[types.REALM_PROJETTYPE].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -698,7 +697,7 @@ class Project extends Component {
                       </option>
                     ))
                   ) : (
-                    <option value="-1" />
+                    <option value="" />
                   )}
                 </TextField>
               </FormControl>
@@ -721,7 +720,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
-                  <option value="-1"> </option>
+                  <option value=""> </option>
                   {thesaurus[types.REALM_PROJETORIG] ? (
                     thesaurus[types.REALM_PROJETORIG].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -729,7 +728,7 @@ class Project extends Component {
                       </option>
                     ))
                   ) : (
-                    <option value="-1" />
+                    <option value="" />
                   )}
                 </TextField>
               </FormControl>
@@ -752,7 +751,7 @@ class Project extends Component {
                   }}
                   margin="normal"
                 >
-                  <option value="-1"> </option>
+                  <option value=""> </option>
                   {thesaurus[types.REALM_PROJETLIMA] ? (
                     thesaurus[types.REALM_PROJETLIMA].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -760,7 +759,7 @@ class Project extends Component {
                       </option>
                     ))
                   ) : (
-                    <option value="-1" />
+                    <option value="" />
                   )}
                 </TextField>
               </FormControl>
@@ -1166,7 +1165,7 @@ const ProjectForm = withFormik({
       projectProjectId:
         project.data && project.data.projectProjectId
           ? project.data.projectProjectId
-          : '',
+          : -1,
       voluntaryWork:
         project.data && project.data.voluntaryWork
           ? project.data.voluntaryWork
@@ -1206,22 +1205,22 @@ const ProjectForm = withFormik({
       principalInstitutionId:
         project.data && project.data.principalInstitutionId
           ? project.data.principalInstitutionId
-          : '',
+          : -1,
 
       principalInstitutionPersonId:
         project.data && project.data.principalInstitutionPersonId
           ? project.data.principalInstitutionPersonId
-          : '',
+          : -1,
 
       mandataryInstitutionId:
         project.data && project.data.mandataryInstitutionId
           ? project.data.mandataryInstitutionId
-          : '',
+          : -1,
 
       mandataryInstitutionPersonId:
         project.data && project.data.mandataryInstitutionPersonId
           ? project.data.mandataryInstitutionPersonId
-          : '',
+          : -1,
 
       principalInstitutionName:
         project.data && project.data.principalInstitutionName
