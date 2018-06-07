@@ -44,7 +44,7 @@ const projectReducer = (state = initialState, action) => {
       case types.ADD_PROJECT:
       case types.UPDATE_PROJECT:
       case types.DELETE_PROJECT:
-          return {...state, ongoingRequest: false,  error: null,opreationType:action.payload};
+          return {...state, ongoingRequest: false,  error: null, opreationType:action.payload};
 
     default:
       return state;

@@ -56,6 +56,7 @@ class Projects extends Component {
 
     componentDidMount(){
         this.notificationInput = React.createRef();
+        console.log(this.props.opreationType);
         if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
             const { t } = this.props;
             setTimeout(()=>this.addNofification(
@@ -293,6 +294,7 @@ class Projects extends Component {
           />
         </Paper>
         <br />
+          <NotificationSystem ref={this.notificationInput} />
       </div>
     );
   }

@@ -419,7 +419,7 @@ class Project extends Component {
         label: suggestion.code
       }));
       if(this.props.project.data && this.props.project.data.id){
-          debugger;
+          suggestionsProject.filter(p => p.value !== parseInt(this.props.project.data.id))
       }
     }
 
