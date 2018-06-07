@@ -10,14 +10,21 @@ const fetchPersonAction = payload => ({
   type: types.FETCH_PERSON,
   payload
 });
-
-const updatePersonAction = () => ({
-    type: types.UPDATE_PERSON
+const prepareFormAction = () =>({
+    type: types.PREPARE_FORM_FOR_ADD
+})
+const updatePersonAction =() => ({
+    type: types.UPDATE_PERSON,
+    payload:types.MODIFY_OPREATION_TYPE
 });
 const addNewPersonAction = () => ({
-    type: types.ADD_PERSON
+    type: types.ADD_PERSON,
+    payload:types.ADD_OPREATION_TYPE
 });
-
+const deletePersonAction =() => ({
+    type: types.UPDATE_PERSON,
+    payload:types.DELETE_OPREATION_TYPE
+});
 const errorFecthingPersonAction = payload => ({
   type: types.ERROR_FECTHING_PERSON,
   payload
@@ -50,9 +57,15 @@ const updatePersonAxios = async (id, updatedPerson) => {
 const addNewPersonAxios = async (person) => {
     const url =`/api/persons/`;
     console.log(`addNewPersonAxios url:${JSON.stringify(person,null,3)}`);
-    return axios.post(person);
+    return axios.post(url,person);
 };
 
+
+const deletePersonAxios = (id) =>{
+    const url =`/api/persons/${id}`;
+    console.log(`deletePersonAxios url:${url}`);
+    return axios.delete(url);
+}
 
 
 
@@ -75,10 +88,8 @@ const fetchPerson = (id) => async (dispatch, getState) => {
 
 const updatePerson = (id, updatedPerson) => async (dispatch, getState) => {
     try {
-        dispatch(initiateRequestPersonAction());
         await updatePersonAxios(id,updatedPerson);
-        const updatePersonAction = updatePersonAction();
-        dispatch(updatePersonAction);
+        dispatch(updatePersonAction());
     } catch (e) {
         dispatch(errorUpdatingPersonAction('error updating person detail'));
     }
@@ -86,15 +97,26 @@ const updatePerson = (id, updatedPerson) => async (dispatch, getState) => {
 
 const addNewPerson = (person) => async (dispatch, getState) => {
     try {
-        dispatch(initiateRequestPersonAction());
-        await addNewPersonAxios(person);
-        const addPersonAction = addNewPersonAction();
-        dispatch(addPersonAction);
+       const response= await addNewPersonAxios(person);
+        dispatch( addNewPersonAction(types.ADD_OPREATION_TYPE));
+        return response;
     } catch (e) {
         dispatch(errorAddingNewPersonAction('error adding new person'));
     }
 };
 
+
+const deletePerson = (id) => async (dispatch, getState) => {
+    try {
+        const person = await deletePersonAxios(id);
+        dispatch(deletePersonAction());
+    } catch (e) {
+        dispatch(errorFecthingPersonAction('error loading person detail'));
+    }
+};
+
+const prepareForm  = () => dispatch =>
+    dispatch(prepareFormAction());
 
 
 
@@ -102,5 +124,7 @@ export {
     initiateRequestPerson,
     fetchPerson,
     updatePerson,
-    addNewPerson
+    prepareForm,
+    addNewPerson,
+    deletePerson
 };

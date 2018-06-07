@@ -3,13 +3,16 @@ import * as types from '../actions/Types';
 const initialState = {
     data: null,
     error: null,
-    ongoingRequest: false
+    ongoingRequest: false,
+    opreationType:null,
 };
 
 const personReducer = (state = initialState, action) => {
     switch (action.type) {
+        case types.PREPARE_FORM_FOR_ADD:
+            return {...initialState}
         case types.INITIATE_FETCH_PERSON:
-            return {...state, ongoingRequest: true};
+            return {...state, ongoingRequest: true, opreationType:null};
         case types.ERROR_FECTHING_PERSON:
         case types.ERROR_ADD_PERSON:
         case types.ERROR_UPDATE_PERSON:
@@ -19,11 +22,12 @@ const personReducer = (state = initialState, action) => {
                 ...state,
                 data: action.payload,
                 error: null,
-                ongoingRequest: false
+                ongoingRequest: false,
+                opreationType:types.FETCH_OPREATION_TYPE
             };
         case types.ADD_PERSON:
         case types.UPDATE_PERSON:
-            return {...state, ongoingRequest: false};
+            return {...state, ongoingRequest: false,  error: null,opreationType:action.payload};
         default:
             return state;
     }

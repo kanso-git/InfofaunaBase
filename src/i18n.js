@@ -158,6 +158,24 @@ i18n
                         "Audit Last Update":"Last Update",
                         "Audit Web application users":"Web application users",
 
+                        'Dialog Title confirmation':'Confimration Dialog',
+                        'Dialog Body confirmation':'Are you sure',
+                        'Dialog Cancel button':'Cancel',
+                        'Dialog Confirm button':'Continue',
+
+                        'Notification Title success':'Success!',
+                        'Notification Body add success':'Item created successfully',
+                        'Notification Body modify success':'Item modified successfully',
+                        'Notification Body delete success':'Item deleted successfully',
+
+                        'Notification Title warning':'Warning!',
+                        'Notification Body add warning':'Warning when creating item',
+                        'Notification Body modify warning':'Warning when modifying item',
+
+                        'Notification Title error':'Error!',
+                        'Notification Body add error':'Error when creating item',
+                        'Notification Body modify error':'Error when modifying item'
+
                 }
             },
             fr: {

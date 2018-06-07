@@ -7,6 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import Delete from '@material-ui/icons/Delete';
 import Save from '@material-ui/icons/Save';
+import Cancel from '@material-ui/icons/Cancel';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Input from '@material-ui/core/Input';
@@ -28,6 +29,8 @@ import * as types from '../../../store/actions/Types';
 import { NavLink, Redirect } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Audit from "../../Audit/Audit";
+import Dialog from '../../Dialog/Dialog';
+const NotificationSystem = require('react-notification-system');
 
 
 
@@ -85,49 +88,101 @@ let Person_Email_format_is_not_valid;
 
 class Person extends Component {
   state = {
-    loadingProgress: false,
-    enableEditMode: false
+       enableEditMode: false,
+       loading:false
   };
 
+
   componentDidMount() {
+    console.log('componentDidMount .............');
+    this.notificationInput = React.createRef();
     const { id } = this.props.match.params;
 
-    if (
-      !this.props.person.ongoingRequest &&
-      (!this.props.person.data ||
-        (this.props.person.data != null && this.props.person.data.id != id ))
-    ) {
-      this.setState(()=>({reload:false}));
+    if (id && !this.props.person.ongoingRequest && this.isNotTheSame()) {
       this.props.initiateRequestPerson();
-
-      if (!this.props.thesaurus[types.REALM_COUNTRY]) {
-        this.props.fetchThesaurus(types.REALM_COUNTRY);
-      }
-      if (!this.props.thesaurus[types.REALM_GENDER]) {
-        this.props.fetchThesaurus(types.REALM_GENDER);
-      }
-      if (!this.props.thesaurus[types.REALM_TITLE]) {
-        this.props.fetchThesaurus(types.REALM_TITLE);
-      }
-      if (!this.props.thesaurus[types.REALM_LANGUAGE]) {
-        this.props.fetchThesaurus(types.REALM_LANGUAGE);
-      }
+      this.loadAdditionalData();
       this.props.fetchPerson(id);
+    }else if(!id){
+         this.setState(()=>({
+             enableEditMode: true,
+             loading: true
+         }))
+        this.loadAdditionalData();
+        this.setState(()=>({
+            loading: false
+        }))
     }
   }
 
+
+  loadAdditionalData = ()=> {
+    if (!this.props.thesaurus[types.REALM_COUNTRY]) {
+        this.props.fetchThesaurus(types.REALM_COUNTRY);
+    }
+    if (!this.props.thesaurus[types.REALM_GENDER]) {
+        this.props.fetchThesaurus(types.REALM_GENDER);
+    }
+    if (!this.props.thesaurus[types.REALM_TITLE]) {
+        this.props.fetchThesaurus(types.REALM_TITLE);
+    }
+    if (!this.props.thesaurus[types.REALM_LANGUAGE]) {
+        this.props.fetchThesaurus(types.REALM_LANGUAGE);
+    }
+  }
+
+  isNotTheSame =()=>{
+      if(this.props.person.data ){
+        const { id } = this.props.match.params;
+        if(this.props.person.data.id === parseInt(id)){
+            return false
+        }
+      }
+      return true;
+  }
+  componentWillReceiveProps(nextProps){
+    console.log('componentWillReceiveProps .............');
+    if( nextProps.person.opreationType === types.ADD_OPREATION_TYPE ){
+          const {id} = nextProps.match.params;
+          if(id && id != this.props.match.params.id){
+              this.props.fetchPerson(id);
+          }else if(!id){
+              const { t } = this.props;
+              this.addNofification(
+                  t('Notification Body add success'),
+                  t('Notification Title success'),
+                  'success');
+          }
+
+    }
+
+    if(nextProps.person.opreationType === types.MODIFY_OPREATION_TYPE){
+       const { t } = this.props;
+       this.addNofification(
+           t('Notification Body modify success'),
+           t('Notification Title success'),
+           'success')
+    }
+  }
+
+  addNofification = (message, title, level)=>{
+      if(this.notificationInput.current){
+        this.notificationInput.current.addNotification({
+              title: title,
+              message: message,
+              level: level,
+              position: 'tr'
+          });
+      }
+  }
   handleEnableEditMode = () => {
     this.setState(prevState => ({ enableEditMode: !prevState.enableEditMode }));
   };
-  handleClickShowPassword = () => {
-    this.setState({ showPassword: !this.state.showPassword });
-  };
 
-
-
+  handleDelete = (id) =>{
+      this.props.deletePerson(id);
+      setTimeout(()=>this.props.history.push('/persons'), 200);
+  }
   render() {
-
-
     const { classes } = this.props;
     const {t,i18n } = this.props;
 
@@ -157,7 +212,7 @@ class Person extends Component {
         auditData={...person.data.auditDTO}
     }
 
-    if (this.props.person.ongoingRequest && !this.props.person.data) {
+    if (this.props.person.ongoingRequest || this.state.loading){
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
@@ -183,7 +238,10 @@ class Person extends Component {
             <NavLink to="/persons" className={classes.backLink}>
                 {t('Person Persons')}
             </NavLink> >
-            <span className={classes.actualSite}> {t('Person Person Detail')}</span>
+              {this.props.match.params.id ?
+                  <span className={classes.actualSite}> {t('Person Person Detail')}</span>
+                  :  <span className={classes.actualSite}> {t('Person Person New')}</span> }
+
           </Typography>
 
           <div style={{ float: 'right' }}>
@@ -201,8 +259,7 @@ class Person extends Component {
               />
             </Tooltip>
           </div>
-            <Audit {...auditData}/>
-
+            { this.props.match.params.id ?  <Audit {...auditData}/> :''}
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
@@ -305,6 +362,7 @@ class Person extends Component {
                   }}
                   margin="normal"
                 >
+                    <option value="-1"> </option>
                   {thesaurus[types.REALM_GENDER] ? (
                     thesaurus[types.REALM_GENDER].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -336,6 +394,7 @@ class Person extends Component {
                   }}
                   margin="normal"
                 >
+                    <option value="-1"> </option>
                   {thesaurus[types.REALM_LANGUAGE] ? (
                     thesaurus[types.REALM_LANGUAGE].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -450,6 +509,7 @@ class Person extends Component {
                   }}
                   margin="normal"
                 >
+                    <option value=""> </option>
                   {thesaurus[types.REALM_COUNTRY] ? (
                     thesaurus[types.REALM_COUNTRY].map(option => (
                       <option key={option.id} value={option.codeValue}>
@@ -527,7 +587,7 @@ class Person extends Component {
             <br />
 
             {this.state.enableEditMode && (
-              <div>
+              <div style={{display:'flex',justifyContent:'flex-end'}}>
                 <Button
                   className={classes.button}
                   variant="raised"
@@ -536,21 +596,30 @@ class Person extends Component {
                   size="small"
                 >
                   <Save className={classNames(classes.rightIcon)} />
-                    {t('Person Save')}
+                    &nbsp; &nbsp;{t('Person Save')}
                 </Button>
+                  { this.props.match.params.id
+                      ?
+                      <Button
+                          className={classes.button}
+                          variant="raised"
+                          color="secondary"
+                          onClick={() => this.setState(()=>({dialog: true})) }
+                      >
+                          {t('Person Delete')}
+                          <Delete className={classes.rightIcon} />
+                      </Button> :
+                    ''
+                  }
 
-                <Button
-                  className={classes.button}
-                  variant="raised"
-                  color="secondary"
-                >
-                    {t('Person Delete')}
-                  <Delete className={classes.rightIcon} />
-                </Button>
               </div>
             )}
           </Form>
         </Paper>
+          <NotificationSystem ref={this.notificationInput} />
+          {this.state.dialog ?
+              <Dialog handleClose={() => this.setState(()=>({dialog: false})) } handleDelete={()=> this.handleDelete(this.props.match.params.id)}/> : null
+          }
       </div>
     );
   }
@@ -569,9 +638,9 @@ const PersonForm = withFormik({
         person.data && person.data.firstName ? person.data.firstName : '',
       lastName: person.data && person.data.lastName ? person.data.lastName : '',
 
-      genderId: person.data && person.data.genderId ? person.data.genderId : -1,
+      genderId: person.data && person.data.genderId ? person.data.genderId : '',
       languageId:
-        person.data && person.data.languageId ? person.data.languageId : -1,
+        person.data && person.data.languageId ? person.data.languageId :'',
       dateOfBirth:
         person.data && person.data.dateOfBirth
           ? moment(person.data.dateOfBirth).format('YYYY-MM-DD')
@@ -581,7 +650,7 @@ const PersonForm = withFormik({
       zipCode: person.data && person.data.zipCode ? person.data.zipCode : '',
       locality: person.data && person.data.locality ? person.data.locality : '',
       countryId:
-        person.data && person.data.countryId ? person.data.countryId : -1,
+        person.data && person.data.countryId ? person.data.countryId : '',
       proPhone: person.data && person.data.proPhone ? person.data.proPhone : '',
       mobilePhone:
         person.data && person.data.mobilePhone ? person.data.mobilePhone : '',
@@ -590,16 +659,20 @@ const PersonForm = withFormik({
       email: person.data && person.data.email ? person.data.email : ''
     };
   },
-  handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-    console.log(JSON.stringify(values, null,3));
-    // let's suppose that we do a server validtion call
-    //props.initiateLogin();
-    //props.login(values);
-      const { id } = props.match.params;
-      props.updatePerson(id, values);
-      setSubmitting(false);
+  async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
+      console.log(JSON.stringify(values, null,3));
+      if(props.match.params.id){
+          const { id } = props.match.params;
+          await props.updatePerson(id, values);
+          await props.fetchPerson(id);
+          setSubmitting(false);
+      }else{
+          const response= await props.addNewPerson(values);
+          setTimeout(()=>props.history.push(response.headers.location), 200);
+      }
+
   },
-  isInitialValid: true,
+  isInitialValid: (props)=> props.match.params.id ? true:false,
   validationSchema: () => object().shape({
     firstName: string().required(Person_FirstName_is_required),
     lastName: string().required(Person_LastName_is_required),

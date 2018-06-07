@@ -14,6 +14,8 @@ import axios from '../../axios-infofauna';
 import cssPersons from './Persons.css';
 import { personActions } from '../../store/actions';
 import { connect } from 'react-redux';
+import * as types from '../../store/actions/Types';
+const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -53,6 +55,18 @@ class Persons extends Component {
     filtered: ''
   };
 
+  componentDidMount(){
+      this.notificationInput = React.createRef();
+     if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
+       const { t } = this.props;
+       setTimeout(()=>this.addNofification(
+           t('Notification Body delete success'),
+           t('Notification Title success'),
+           'success'
+       ), 200);
+     }
+  }
+
   getParamByNameFormUrl = (name, url) => {
     if (
       (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
@@ -66,6 +80,21 @@ class Persons extends Component {
     this.props.history.push('/persons/' + id);
   };
 
+    handleNew = () => {
+        this.props.prepareForm();
+        this.props.history.push('/persons/new');
+    };
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
   handleFiltered = async e => {
     const filtered = e.target.value;
     this.filtered = filtered;
@@ -160,6 +189,7 @@ class Persons extends Component {
                 color="primary"
                 aria-label="add"
                 className={classes.button}
+                onClick={this.handleNew}
               >
                 <AddIcon />
               </Button>
@@ -254,6 +284,7 @@ class Persons extends Component {
           />
         </Paper>
         <br />
+          <NotificationSystem ref={this.notificationInput} />
       </div>
     );
   }
@@ -263,4 +294,9 @@ Persons.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default connect(null, { ...personActions })(withStyles(styles)( translate('translations')(Persons)));
+const mapStateToProps =(state) => ({
+    opreationType: state.person.opreationType
+})
+
+
+export default connect(mapStateToProps, { ...personActions })(withStyles(styles)( translate('translations')(Persons)));
