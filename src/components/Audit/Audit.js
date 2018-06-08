@@ -85,7 +85,7 @@ const Audit = (props) => {
                                 <TableCell component="th" scope="row">
                                     {t('Audit Creation')}
                                 </TableCell>
-                                <TableCell >{props.appCreationDate ? moment(props.appCreationDate).format('DD.MM.YYYY hh:mm:ss'):''}</TableCell>
+                                <TableCell >{props.oraCreationDate ? moment(props.oraCreationDate).format('DD.MM.YYYY hh:mm:ss'):''}</TableCell>
                                 <TableCell >{props.appCreationUser ? <NavLink to={'/users/'+props.appCreationUserId} >{props.appCreationUser}</NavLink> : ''}</TableCell>
                             </TableRow>
 

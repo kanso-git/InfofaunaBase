@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Form, withFormik } from 'formik';
-import { object, string } from 'yup';
+import { object, string , date} from 'yup';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
@@ -14,6 +14,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
+import MaskedInput from 'react-text-mask';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Switch from '@material-ui/core/Switch';
@@ -31,6 +32,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Audit from "../../Audit/Audit";
 import Dialog from '../../Dialog/Dialog';
 const NotificationSystem = require('react-notification-system');
+
 
 
 
@@ -85,6 +87,21 @@ let Person_Language_is_required ;
 let Person_Country_is_required;
 let Person_Phone_format_is_not_valid;
 let Person_Email_format_is_not_valid;
+
+
+function PhoneMaskCustom(props) {
+    const { inputRef, ...other } = props;
+
+    return (
+        <MaskedInput
+            {...other}
+            ref={inputRef}
+            mask={[/[+]/,/[1-9]/,/[1-9]/, ' ', /\d/, /\d/,' ', /\d/, /\d/, /\d/, ' ', /\d/, /\d/,' ', /\d/, /\d/]}
+            showMask={false}
+        />
+    );
+}
+
 
 class Person extends Component {
   state = {
@@ -237,13 +254,14 @@ class Person extends Component {
           <Typography variant="headline" component="h3">
             <NavLink to="/persons" className={classes.backLink}>
                 {t('Person Persons')}
-            </NavLink> >
+            </NavLink>  &nbsp;>&nbsp;
               {this.props.match.params.id ?
                   <span className={classes.actualSite}> {t('Person Person Detail')}</span>
                   :  <span className={classes.actualSite}> {t('Person Person New')}</span> }
 
           </Typography>
 
+            {this.props.match.params.id ?
           <div style={{ float: 'right' }}>
             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
@@ -258,7 +276,7 @@ class Person extends Component {
                 label= {t('Form Enable edit mode')}
               />
             </Tooltip>
-          </div>
+          </div> :''}
             { this.props.match.params.id ?  <Audit {...auditData}/> :''}
           <Form>
             <br />
@@ -343,17 +361,18 @@ class Person extends Component {
                   )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl}  error={touched.genderId && errors.genderId ? true : false}>
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="select-gender-native"
                   name="genderId"
                   select
-                  label={t('Person Gendre')}
+                  label={`*${t('Person Gender')}`}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.genderId}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   SelectProps={{
                     native: true,
                     MenuProps: {
@@ -373,19 +392,26 @@ class Person extends Component {
                     <option value="-1" />
                   )}
                 </TextField>
+                  {touched.genderId &&
+                  errors.genderId && (
+                      <FormHelperText id="genderId-text">
+                          {errors.genderId}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl}  error={touched.languageId && errors.languageId ? true : false}>
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="select-language-native"
                   name="languageId"
                   select
-                  label ={t('Person Language')}
+                  label ={`*${t('Person Language')}`}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.languageId}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   SelectProps={{
                     native: true,
                     MenuProps: {
@@ -405,9 +431,15 @@ class Person extends Component {
                     <option value="-1" />
                   )}
                 </TextField>
+                  {touched.languageId &&
+                  errors.languageId && (
+                      <FormHelperText id="languageId-text">
+                          {errors.languageId}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.dateOfBirth && errors.dateOfBirth ? true : false}>
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="date"
@@ -415,12 +447,19 @@ class Person extends Component {
                   name="dateOfBirth"
                   type="date"
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   className={classes.textField}
                   value={values.dateOfBirth}
                   InputLabelProps={{
                     shrink: true
                   }}
                 />
+                  {touched.dateOfBirth &&
+                  errors.dateOfBirth && (
+                      <FormHelperText id="dateOfBirth-text">
+                          {errors.dateOfBirth}
+                      </FormHelperText>
+                  )}
               </FormControl>
             </Paper>
 
@@ -461,7 +500,7 @@ class Person extends Component {
                 />
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.zipCode && errors.zipCode ? true : false}>
                 <InputLabel htmlFor="zipCode">{t('Person Postal code')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -474,6 +513,12 @@ class Person extends Component {
                   onBlur={handleBlur}
                   value={values.zipCode}
                 />
+                  {touched.zipCode &&
+                  errors.zipCode && (
+                      <FormHelperText id="zipCode-text">
+                          {errors.zipCode}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
               <FormControl className={classes.formControl}>
@@ -490,17 +535,18 @@ class Person extends Component {
                 />
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.countryId && errors.countryId ? true : false}>
                 <TextField
                   disabled={!this.state.enableEditMode}
                   id="select-pays-native"
                   name="countryId"
                   select
-                  label={t('Person Country')}
+                  label={`*${t('Person Country')}`}
                   className={classes.textField}
                   style={{ width: 150 }}
                   value={values.countryId}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   SelectProps={{
                     native: true,
                     MenuProps: {
@@ -520,12 +566,18 @@ class Person extends Component {
                     <option value="-1" />
                   )}
                 </TextField>
+                  {touched.countryId &&
+                  errors.countryId && (
+                      <FormHelperText id="countryId-text">
+                          {errors.countryId}
+                      </FormHelperText>
+                  )}
               </FormControl>
             </Paper>
 
             <Paper className={classes.root} elevation={1}>
               <Typography component="p">{t('Person Contact informations')}</Typography>
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.proPhone && errors.proPhone ? true : false}>
                 <InputLabel htmlFor="proPhone">
                     {t('Person Professional phone')}
                 </InputLabel>
@@ -538,10 +590,18 @@ class Person extends Component {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={values.proPhone}
+                  inputComponent={PhoneMaskCustom}
                 />
+                  <FormHelperText id="privatePhone-helper-text">&nbsp; +XX&nbsp; XX &nbsp;XXX&nbsp; XX&nbsp; XX</FormHelperText>
+                  {touched.proPhone &&
+                  errors.proPhone && (
+                      <FormHelperText id="firstName-text">
+                          {errors.proPhone}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.mobilePhone && errors.mobilePhone ? true : false}>
                 <InputLabel htmlFor="mobilePhone">{t('Person Mobile phone')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -552,10 +612,18 @@ class Person extends Component {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={values.mobilePhone}
+                  inputComponent={PhoneMaskCustom}
                 />
+                  <FormHelperText id="privatePhone-helper-text">&nbsp; +XX&nbsp; XX &nbsp;XXX&nbsp; XX&nbsp; XX</FormHelperText>
+                  {touched.mobilePhone &&
+                  errors.mobilePhone && (
+                      <FormHelperText id="mobilePhone-text">
+                          {errors.mobilePhone}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl} error={touched.privatePhone && errors.privatePhone ? true : false}>
                 <InputLabel htmlFor="privatePhone"> {t('Person Private phone')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -566,10 +634,18 @@ class Person extends Component {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={values.privatePhone}
+                  inputComponent={PhoneMaskCustom}
                 />
+                  <FormHelperText id="privatePhone-helper-text">&nbsp; +XX&nbsp; XX &nbsp;XXX&nbsp; XX&nbsp; XX</FormHelperText>
+                  {touched.privatePhone &&
+                  errors.privatePhone && (
+                      <FormHelperText id="privatePhone-text">
+                          {errors.privatePhone}
+                      </FormHelperText>
+                  )}
               </FormControl>
 
-              <FormControl className={classes.formControl}>
+              <FormControl className={classes.formControl}  error={touched.email && errors.email ? true : false}>
                 <InputLabel htmlFor="email">{t('Person E-mail')}</InputLabel>
                 <Input
                   disabled={!this.state.enableEditMode}
@@ -581,6 +657,12 @@ class Person extends Component {
                   onBlur={handleBlur}
                   value={values.email}
                 />
+                  {touched.email &&
+                  errors.email && (
+                      <FormHelperText id="email-text">
+                          {errors.email}
+                      </FormHelperText>
+                  )}
               </FormControl>
             </Paper>
 
@@ -682,7 +764,8 @@ const PersonForm = withFormik({
     proPhone: string().min(10,Person_Phone_format_is_not_valid),
     mobilePhone: string().min(10, Person_Phone_format_is_not_valid),
     privatePhone: string().min(10, Person_Phone_format_is_not_valid),
-    email: string().email(Person_Email_format_is_not_valid)
+    email: string().email(Person_Email_format_is_not_valid),
+    zipCode:string().min(4).max(6)
   })
 })(Person);
 

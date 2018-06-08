@@ -127,6 +127,7 @@ function TextMaskCustom(props) {
   );
 }
 
+
 function NumberFormatCustom(props) {
   const { inputRef, onChange, ...other } = props;
 
@@ -481,7 +482,7 @@ class Project extends Component {
       }
 
 
-      if (this.props.project.ongoingRequest) {
+      if (this.props.project.ongoingRequest || this.state.loading) {
       return (
         <div className="ProjectContainer">
           <Paper className={classes.root} elevation={4}>
@@ -507,12 +508,12 @@ class Project extends Component {
             <NavLink to="/projects" className={classes.backLink}>
                 {t('Project Projects')}
             </NavLink>
-            >
+             &nbsp;>&nbsp;
               {this.props.match.params.id ?
                   <span className={classes.actualSite}> {t('Project Project Detail')}</span>
                   :  <span className={classes.actualSite}> {t('Project Project New')}</span> }
           </Typography>
-
+            {this.props.match.params.id ?
           <div style={{ float: 'right' }}>
             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
@@ -527,7 +528,7 @@ class Project extends Component {
                 label={t('Form Enable edit mode')}
               />
             </Tooltip>
-          </div>
+          </div>:''}
             { this.props.match.params.id ?  <Audit {...auditData}/> :''}
           <Form>
             <br />
