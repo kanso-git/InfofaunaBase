@@ -12,7 +12,7 @@ const fetchPersonAction = payload => ({
 });
 
 const prepareFormAction = () =>({
-    type: types.PREPARE_FORM_FOR_ADD
+    type: types.PREPARE_PERSON_FORM_FOR_ADD
 })
 
 const updatePersonAction =() => ({

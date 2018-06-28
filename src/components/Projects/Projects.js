@@ -64,6 +64,7 @@ class Projects extends Component {
                 t('Notification Title success'),
                 'success'
             ), 200);
+         this.props.prepareForm();
         }
     }
 

@@ -12,9 +12,10 @@ import 'react-table/react-table.css';
 import { translate, Trans } from 'react-i18next';
 import axios from '../../axios-infofauna';
 import cssPersons from './Persons.css';
-import { personActions } from '../../store/actions';
+import {personActions, thesaurusActions} from '../../store/actions';
 import { connect } from 'react-redux';
 import * as types from '../../store/actions/Types';
+import withErrorHandler from "../withErrorHandler/withErrorHandler";
 const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
@@ -64,6 +65,8 @@ class Persons extends Component {
            t('Notification Title success'),
            'success'
        ), 200);
+       this.props.prepareForm();
+
      }
   }
 
@@ -140,23 +143,27 @@ class Persons extends Component {
       page: state.page
     }));
 
-    // Request the data however you want.  Here, we'll use our mocked service we created earlier
-    const res = await this.requestData(requestParams);
+    try{
+        // Request the data however you want.  Here, we'll use our mocked service we created earlier
+        const res = await this.requestData(requestParams);
+        const filteredFor = this.getParamByNameFormUrl(
+            'search',
+            res.request.responseURL
+        );
+        if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
+            this.setState(() => ({
+                loading: false
+            }));
+        } else {
+            this.setState(() => ({
+                data: res.data.rows,
+                pages: Math.ceil(res.data.total / state.pageSize),
+                loading: false
+            }));
+        }
+    }catch(e){
+      console.log(e)
 
-    const filteredFor = this.getParamByNameFormUrl(
-      'search',
-      res.request.responseURL
-    );
-    if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
-      this.setState(() => ({
-        loading: false
-      }));
-    } else {
-      this.setState(() => ({
-        data: res.data.rows,
-        pages: Math.ceil(res.data.total / state.pageSize),
-        loading: false
-      }));
     }
   };
 
@@ -299,4 +306,7 @@ const mapStateToProps =(state) => ({
 })
 
 
-export default connect(mapStateToProps, { ...personActions })(withStyles(styles)( translate('translations')(Persons)));
+export default connect(mapStateToProps, {
+    ...personActions
+})(withErrorHandler(withStyles(styles)(translate('translations')(Persons)), axios));
+

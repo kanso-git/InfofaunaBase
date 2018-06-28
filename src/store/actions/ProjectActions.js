@@ -17,7 +17,7 @@ const loadAdditionalDataProjectAction = payload => ({
 });
 
 const prepareFormAction = () => ({
-    type: types.PREPARE_FORM_FOR_ADD
+    type: types.PREPARE_PROJECT_FORM_FOR_ADD
 });
 
 const updateProjectAction = () => ({

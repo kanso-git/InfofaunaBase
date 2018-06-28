@@ -9,10 +9,15 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
 
+
+import {institutionActions, projectActions} from '../../store/actions';
 import axios from '../../axios-infofauna';
 import cssUsers from './Institutions.css';
 import { translate, Trans } from 'react-i18next';
+import {connect} from "react-redux";
+import * as types from "../../store/actions/Types";
 
+const NotificationSystem = require('react-notification-system');
 const styles = theme => ({
   root: theme.mixins.gutters({
     paddingTop: 16,
@@ -49,6 +54,19 @@ class Institutions extends Component {
     filtered: ''
   };
 
+    componentDidMount(){
+        this.notificationInput = React.createRef();
+        console.log(this.props.opreationType);
+        if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
+            const { t } = this.props;
+            setTimeout(()=>this.addNofification(
+                t('Notification Body delete success'),
+                t('Notification Title success'),
+                'success'
+            ), 200);
+            this.props.prepareForm();
+        }
+    }
   getParamByNameFormUrl = (name, url) => {
     if (
       (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
@@ -61,7 +79,25 @@ class Institutions extends Component {
     console.log(`handleOpen :: open the details of inistitution with id:${id}`);
     this.props.history.push('/institutions/' + id);
   };
-  handleFiltered = async e => {
+
+    handleNew = () => {
+        this.props.prepareForm(); // this is to empty the form in case already an item was loaded
+        this.props.history.push('/institutions/new');
+    };
+
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
+
+    handleFiltered = async e => {
     const filtered = e.target.value;
     this.filtered = filtered;
     const updatedState = { ...this.state, filtered, page: 0 };
@@ -149,6 +185,7 @@ class Institutions extends Component {
                 color="primary"
                 aria-label="add"
                 className={classes.button}
+                onClick={this.handleNew}
               >
                 <AddIcon />
               </Button>
@@ -226,6 +263,7 @@ class Institutions extends Component {
           />
         </Paper>
         <br />
+          <NotificationSystem ref={this.notificationInput} />
       </div>
     );
   }
@@ -235,4 +273,12 @@ Institutions.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(translate('translations')(Institutions));
+
+
+const mapStateToProps =(state) => ({
+    opreationType: state.institution.opreationType
+})
+
+export default connect(mapStateToProps, { ...institutionActions })(
+    withStyles(styles)(translate('translations')(Institutions))
+);

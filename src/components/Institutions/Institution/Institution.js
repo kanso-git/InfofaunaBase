@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Form, withFormik } from 'formik';
-import { object, string } from 'yup';
+import { object, string, number } from 'yup';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
@@ -38,6 +38,8 @@ import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 import Audit from "../../Audit/Audit";
 import { translate, Trans } from 'react-i18next';
+import Dialog from '../../Dialog/Dialog';
+const NotificationSystem = require('react-notification-system');
 
 let suggestionsPerson = [];
 
@@ -256,47 +258,110 @@ const styles = theme => ({
 let AUTOCOMPLET_No_results_found ;
 let Institution_Name_is_required;
 let Institution_Acronym_is_required;
+let Institution_Country_is_required;
+let Institution_Person_In_Charge_Function_is_required;
+let Institution_Person_In_Charge_is_required;
+
 let Institution_Phone_format_is_invalid;
 let Institution_Email_format_is_invalid;
 let Institution_Url_format_is_invalid;
 
+
+
+
 class Institution extends Component {
   state = {
-    loadingProgress: false,
-    enableEditMode: false
+      loading: false,
+      enableEditMode: false
   };
 
-  componentDidMount() {
-    const { id } = this.props.match.params;
-    console.log(
-      '>>>>>>>>>>>>>>>>loadingProgress :' + this.state.loadingProgress
-    );
+    componentDidMount() {
+        this.notificationInput = React.createRef();
+        const { id } = this.props.match.params;
 
-    if (
-      !this.props.institution.ongoingRequest &&
-      (!this.props.institution.data ||
-        (this.props.institution.data != null &&
-          this.props.institution.data.id != id))
-    ) {
-      this.props.initiateFetchInstitution();
-
-      if (!this.props.thesaurus[types.REALM_COUNTRY]) {
-        this.props.fetchThesaurus(types.REALM_COUNTRY);
-      }
-      if (!this.props.thesaurus[types.REALM_FUNCTION]) {
-        this.props.fetchThesaurus(types.REALM_FUNCTION);
-      }
-
-      this.props.fetchInstitution(id);
+        if (id && !this.props.institution.ongoingRequest && this.isNotTheSame()) {
+            this.props.initiateFetchInstitution();
+            this.loadThesaurusData();
+            this.props.loadInstitutionPersonListData();
+            this.props.fetchInstitution(id);
+        }else if(!id){
+            this.setState(()=>({
+                enableEditMode: true,
+                loading: true
+            }))
+            this.loadThesaurusData();
+            this.props.loadInstitutionPersonListData();
+            this.setState(()=>({
+                loading: false
+            }))
+        }
     }
-  }
+
+    loadThesaurusData = ()=> {
+        if (!this.props.thesaurus[types.REALM_COUNTRY]) {
+            this.props.fetchThesaurus(types.REALM_COUNTRY);
+        }
+        if (!this.props.thesaurus[types.REALM_FUNCTION]) {
+            this.props.fetchThesaurus(types.REALM_FUNCTION);
+        }
+    }
+
+    isNotTheSame =()=>{
+        if(this.props.institution.data ){
+            const { id } = this.props.match.params;
+            if(this.props.institution.data.id === parseInt(id)){
+                return false
+            }
+        }
+        return true;
+    }
+
+    componentWillReceiveProps(nextProps){
+        console.log('componentWillReceiveProps .............');
+        console.log(nextProps);
+        if( nextProps.institution.opreationType === types.ADD_OPREATION_TYPE ){
+            const {id} = nextProps.match.params;
+            if(id && id != this.props.match.params.id){
+                this.props.fetchInstitution(id);
+            }else if(!id){
+                const { t } = this.props;
+                this.addNofification(
+                    t('Notification Body add success'),
+                    t('Notification Title success'),
+                    'success');
+            }
+
+        }
+
+        if(nextProps.institution.opreationType === types.MODIFY_OPREATION_TYPE){
+            const { t } = this.props;
+            this.addNofification(
+                t('Notification Body modify success'),
+                t('Notification Title success'),
+                'success')
+        }
+    }
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
 
   handleEnableEditMode = () => {
     this.setState(prevState => ({ enableEditMode: !prevState.enableEditMode }));
   };
-  handleClickShowPassword = () => {
-    this.setState({ showPassword: !this.state.showPassword });
-  };
+
+  handleDelete = (id) =>{
+     this.props.deleteInstitution(id);
+     setTimeout(()=>this.props.history.push('/institutions'), 200);
+  }
+
 
   render() {
     if (this.props.institution.personsList) {
@@ -321,6 +386,7 @@ class Institution extends Component {
       thesaurus,
         institution
     } = this.props;
+
       const {t,i18n } = this.props;
       AUTOCOMPLET_No_results_found  = t('AUTOCOMPLET No results found');
 
@@ -330,8 +396,9 @@ class Institution extends Component {
       Institution_Email_format_is_invalid =t('Institution Email format is not valid');
       Institution_Url_format_is_invalid =t('Institution Url format is not valid');
 
-
-
+      Institution_Country_is_required = t('Institution Country is required');
+      Institution_Person_In_Charge_Function_is_required=t('Institution Person In Charge is required');
+      Institution_Person_In_Charge_is_required=t('Institution Person In Charge Function is required');
 
       let auditData={};
       if(institution.data){
@@ -339,7 +406,7 @@ class Institution extends Component {
       }
 
 
-      if (this.props.institution.ongoingRequest) {
+      if (this.props.institution.ongoingRequest || this.state.loading) {
       return (
         <div className="InstitutionContainer">
           <Paper className={classes.root} elevation={4}>
@@ -364,11 +431,14 @@ class Institution extends Component {
           <Typography variant="headline" component="h3">
             <NavLink to="/institutions" className={classes.backLink}>
                 {t('Institution Institutions')}
-            </NavLink>{' '}
-            >
-            <span className={classes.actualSite}> {t('Institution Detail')}</span>
+            </NavLink>
+              &nbsp;>&nbsp;
+              {this.props.match.params.id ?
+                  <span className={classes.actualSite}> {t('Institution Detail')}</span>
+                  :  <span className={classes.actualSite}> {t('Institution Institution New')}</span> }
           </Typography>
 
+          {this.props.match.params.id ?
           <div style={{ float: 'right' }}>
             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
@@ -384,7 +454,9 @@ class Institution extends Component {
               />
             </Tooltip>
           </div>
-            <Audit {...auditData}/>
+              :''}
+            { this.props.match.params.id ?  <Audit {...auditData}/> :''}
+
           <Form>
             <br />
             <Paper className={classes.root} elevation={1}>
@@ -523,15 +595,14 @@ class Institution extends Component {
                   }}
                   margin="normal"
                 >
-                  {thesaurus[types.REALM_COUNTRY] ? (
+                    <option value="-1" />
+                  {thesaurus[types.REALM_COUNTRY] && (
                     thesaurus[types.REALM_COUNTRY].map(option => (
                       <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
-                  ) : (
-                    <option value="-1" />
-                  )}
+                  ) }
                 </TextField>
               </FormControl>
 
@@ -636,15 +707,14 @@ class Institution extends Component {
                   }}
                   margin="normal"
                 >
-                  {thesaurus[types.REALM_FUNCTION] ? (
+                  <option value="-1" />
+                  {thesaurus[types.REALM_FUNCTION] && (
                     thesaurus[types.REALM_FUNCTION].map(option => (
                       <option key={option.id} value={option.codeValue}>
                         {option.designation}
                       </option>
                     ))
-                  ) : (
-                    <option value="-1" />
-                  )}
+                  ) }
                 </TextField>
               </FormControl>
             </Paper>
@@ -652,7 +722,7 @@ class Institution extends Component {
             <br />
 
             {this.state.enableEditMode && (
-              <div>
+              <div style={{display:'flex',justifyContent:'flex-end'}}>
                 <Button
                   className={classes.button}
                   variant="raised"
@@ -664,18 +734,26 @@ class Institution extends Component {
                     {t('Institution Save')}
                 </Button>
 
-                <Button
-                  className={classes.button}
-                  variant="raised"
-                  color="secondary"
-                >
-                    {t('Institution Delete')}
-                  <Delete className={classes.rightIcon} />
-                </Button>
+                  { this.props.match.params.id
+                      ?
+                    <Button
+                      className={classes.button}
+                      variant="raised"
+                      color="secondary"
+                      onClick={() => this.setState(()=>({dialog: true})) }
+                    >
+                        {t('Institution Delete')}
+                      <Delete className={classes.rightIcon} />
+                    </Button>: ''
+                  }
               </div>
             )}
           </Form>
         </Paper>
+          <NotificationSystem ref={this.notificationInput} />
+          {this.state.dialog ?
+              <Dialog handleClose={() => this.setState(()=>({dialog: false})) } handleDelete={()=> this.handleDelete(this.props.match.params.id)}/> : null
+          }
       </div>
     );
   }
@@ -684,6 +762,7 @@ class Institution extends Component {
 const InstitutionForm = withFormik({
   // we can passe the default values props from the parent component - useful for edit
   enableReinitialize: true,
+
   mapPropsToValues({ firstName, lastName, username, password, institution }) {
     return {
       acronym:
@@ -731,17 +810,25 @@ const InstitutionForm = withFormik({
       url: institution.data && institution.data.url ? institution.data.url : ''
     };
   },
-  handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-    // let's suppose that we do a server validtion call
+  async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
       console.log(JSON.stringify(values, null,3));
-    //props.initiateLogin();
-    //props.login(values);
-    setSubmitting(false);
+      if(props.match.params.id){
+          const { id } = props.match.params;
+          await props.updateInstitution(id, values);
+          await props.fetchInstitution(id);
+          setSubmitting(false);
+      }else{
+          const response= await props.addNewInstitution(values);
+          setTimeout(()=>props.history.push(response.headers.location), 200);
+      }
   },
-  isInitialValid: true,
+  isInitialValid: (props)=> props.match.params.id ? true:false,
   validationSchema: () =>object().shape({
     acronym: string().required(Institution_Acronym_is_required),
     name: string().required(Institution_Name_is_required),
+    countryId: number().min(1).required(Institution_Country_is_required),
+    personInChargeId: number().min(1).required(Institution_Person_In_Charge_is_required),
+    personInChargeFunctionId:number().min(1).required(Institution_Person_In_Charge_Function_is_required),
     phone: string().min(10, Institution_Phone_format_is_invalid),
     fax: string().min(10, Institution_Phone_format_is_invalid),
     url: string().url(Institution_Url_format_is_invalid)

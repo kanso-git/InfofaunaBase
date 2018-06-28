@@ -10,7 +10,7 @@ const initialState = {
 
 const projectReducer = (state = initialState, action) => {
   switch (action.type) {
-      case types.PREPARE_FORM_FOR_ADD:
+      case types.PREPARE_PROJECT_FORM_FOR_ADD:
           return {...initialState}
     case types.INITIATE_FETCH_PROJECT:
       return { ...state, error: null, ongoingRequest: true , opreationType:null};
@@ -22,7 +22,7 @@ const projectReducer = (state = initialState, action) => {
         data: action.payload.data,
         error: null,
         ongoingRequest: false,
-          opreationType:types.FETCH_OPREATION_TYPE
+        opreationType:types.FETCH_OPREATION_TYPE
       };
 
       case types.LOAD_ADDITIONAL_DATA_PROJECT:
