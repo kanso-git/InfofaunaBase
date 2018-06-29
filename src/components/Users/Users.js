@@ -12,6 +12,11 @@ import { translate, Trans } from 'react-i18next';
 
 import axios from '../../axios-infofauna';
 import cssUsers from './Users.css';
+import {userActions} from "../../store/actions";
+import {connect} from "react-redux";
+import withErrorHandler from "../withErrorHandler/withErrorHandler";
+import * as types from "../../store/actions/Types";
+const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -49,6 +54,21 @@ class Users extends Component {
     filtered: ''
   };
 
+    componentDidMount(){
+
+        this.notificationInput = React.createRef();
+        if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
+            const { t } = this.props;
+            setTimeout(()=>this.addNofification(
+                t('Notification Body delete success'),
+                t('Notification Title success'),
+                'success'
+            ), 200);
+            this.props.prepareForm();
+
+        }
+    }
+
   getParamByNameFormUrl = (name, url) => {
     if (
       (name = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)').exec(
@@ -61,6 +81,22 @@ class Users extends Component {
     console.log(`handleOpen :: open the details of user with id:${id}`);
     this.props.history.push('/users/' + id);
   };
+
+    handleNew = () => {
+        this.props.prepareForm();
+        this.props.history.push('/users/new');
+    };
+
+    addNofification = (message, title, level)=>{
+        if(this.notificationInput.current){
+            this.notificationInput.current.addNotification({
+                title: title,
+                message: message,
+                level: level,
+                position: 'tr'
+            });
+        }
+    }
 
   handleFiltered = e => {
     const filtered = e.target.value;
@@ -107,28 +143,32 @@ class Users extends Component {
       page: state.page
     }));
 
-    // Request the data however you want.  Here, we'll use our mocked service we created earlier
+    try{
+        // Request the data however you want.  Here, we'll use our mocked service we created earlier
+        const res = await this.requestData(requestParams);
 
-    const res = await this.requestData(requestParams);
-
-    const filteredFor = this.getParamByNameFormUrl(
-      'search',
-      res.request.responseURL
-    );
-    if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
-      this.setState(() => ({
-        loading: false
-      }));
-    } else {
-      this.setState(() => ({
-        data: res.data.rows,
-        pages: Math.ceil(res.data.total / state.pageSize),
-        loading: false
-      }));
+        const filteredFor = this.getParamByNameFormUrl(
+            'search',
+            res.request.responseURL
+        );
+        if ((filteredFor || this.filtered) && filteredFor !== this.filtered) {
+            this.setState(() => ({
+                loading: false
+            }));
+        } else {
+            this.setState(() => ({
+                data: res.data.rows,
+                pages: Math.ceil(res.data.total / state.pageSize),
+                loading: false
+            }));
+        }
+    }catch(e){
+        console.log(e)
     }
   };
 
   render() {
+    console.log(this.props)
     const { classes } = this.props;
     const {t,i18n } = this.props;
     const { data, pages, loading } = this.state;
@@ -157,6 +197,7 @@ class Users extends Component {
                 color="primary"
                 aria-label="add"
                 className={classes.button}
+                onClick={this.handleNew}
               >
                 <AddIcon />
               </Button>
@@ -262,6 +303,7 @@ class Users extends Component {
           />
         </Paper>
         <br />
+          <NotificationSystem ref={this.notificationInput} />
       </div>
     );
   }
@@ -271,4 +313,14 @@ Users.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(translate('translations')(Users));
+const mapStateToProps =(state) => ({
+    opreationType: state.user.opreationType
+})
+
+
+export default connect(mapStateToProps, {
+    ...userActions
+})(withErrorHandler(withStyles(styles)(translate('translations')(Users)), axios));
+
+
+

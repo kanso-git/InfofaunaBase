@@ -257,7 +257,7 @@ const styles = theme => ({
 
 let AUTOCOMPLET_No_results_found ;
 let User_Name_is_required;
-let User_Acronym_is_required;
+let User_Username_is_required;
 let User_Country_is_required;
 let User_Person_In_Charge_Function_is_required;
 let User_Person_In_Charge_is_required;
@@ -276,14 +276,15 @@ class User extends Component {
     };
 
     componentDidMount() {
+        console.log("componentDidMount...");
         this.notificationInput = React.createRef();
         const { id } = this.props.match.params;
 
         if (id && !this.props.user.ongoingRequest && this.isNotTheSame()) {
-            this.props.initiateFetchUser();
-            this.loadThesaurusData();
-            this.props.loadUserPersonListData();
-            this.props.fetchUser(id);
+             this.props.initiateFetchUser();
+             this.loadThesaurusData();
+             this.props.loadUserPersonListData();
+             this.props.fetchUser(id);
         }else if(!id){
             this.setState(()=>({
                 enableEditMode: true,
@@ -317,7 +318,7 @@ class User extends Component {
     }
 
     componentWillReceiveProps(nextProps){
-        console.log('componentWillReceiveProps .............');
+        console.log('user componentWillReceiveProps .............');
         console.log(nextProps);
         if( nextProps.user.opreationType === types.ADD_OPREATION_TYPE ){
             const {id} = nextProps.match.params;
@@ -359,11 +360,12 @@ class User extends Component {
 
     handleDelete = (id) =>{
         this.props.deleteUser(id);
-        setTimeout(()=>this.props.history.push('/Users'), 200);
+        setTimeout(()=>this.props.history.push('/users'), 200);
     }
 
 
     render() {
+        console.log('user render .............');
         if (this.props.user.personsList) {
             suggestionsPerson = this.props.user.personsList.map(
                 suggestion => ({
@@ -384,14 +386,14 @@ class User extends Component {
             isSubmitting,
             isValid,
             thesaurus,
-            User
+            user
         } = this.props;
 
         const {t,i18n } = this.props;
         AUTOCOMPLET_No_results_found  = t('AUTOCOMPLET No results found');
 
         User_Name_is_required =t('User Name is required');
-        User_Acronym_is_required =t('User Acronym is required');
+        User_Username_is_required =t('User Acronym is required');
         User_Phone_format_is_invalid =t('User Phone format is not valid');
         User_Email_format_is_invalid =t('User Email format is not valid');
         User_Url_format_is_invalid =t('User Url format is not valid');
@@ -459,6 +461,60 @@ class User extends Component {
 
                     <Form>
                         <br />
+                        <Paper className={classes.root} elevation={1}>
+                            <Typography component="p">{t('User Info')}</Typography>
+
+                            <FormControl className={classes.formControl}>
+                                <InputLabel htmlFor="personInChargeId">*{t('User Person')}</InputLabel>
+                                <Input
+                                    name="personInChargeId"
+                                    disabled={!this.state.enableEditMode}
+                                    inputComponent={SelectWrapped}
+                                    value={values.personInChargeId}
+                                    className={classes.textField}
+                                    onChange={b =>
+                                        this.props.setFieldValue('personInChargeId', b)
+                                    }
+                                    onBlur={handleBlur}
+                                    placeholder={t('User Person')}
+                                    id="react-select-single"
+                                    inputProps={{
+                                        classes,
+                                        name: 'react-select-single',
+                                        instanceId: 'react-select-single',
+                                        simpleValue: true,
+                                        options: suggestionsPerson
+                                    }}
+                                />
+                            </FormControl>
+
+                            <FormControl
+                                className={classes.formControl}
+                                error={touched.username && errors.username ? true : false}
+                            >
+                                <InputLabel htmlFor="name">*{t('User Username')}</InputLabel>
+                                <Input
+                                    disabled={!this.state.enableEditMode}
+                                    id="username"
+                                    type="input"
+                                    name="username"
+                                    className={classes.textField}
+                                    style={{ width: 400 }}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.username}
+                                />
+                                {touched.username &&
+                                errors.username && (
+                                    <FormHelperText id="name-text">
+                                        {errors.username}
+                                    </FormHelperText>
+                                )}
+                            </FormControl>
+
+
+                        </Paper>
+
                         <Paper className={classes.root} elevation={1}>
                             <Typography component="p">{t('User Name and acronym')}</Typography>
 
@@ -662,62 +718,6 @@ class User extends Component {
 
                         </Paper>
 
-                        <Paper className={classes.root} elevation={1}>
-                            <Typography component="p">{t('User Person in charge')}</Typography>
-
-                            <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor="personInChargeId">*{t('User Person fulName')}</InputLabel>
-                                <Input
-                                    name="personInChargeId"
-                                    disabled={!this.state.enableEditMode}
-                                    inputComponent={SelectWrapped}
-                                    value={values.personInChargeId}
-                                    className={classes.textField}
-                                    onChange={b =>
-                                        this.props.setFieldValue('personInChargeId', b)
-                                    }
-                                    onBlur={handleBlur}
-                                    placeholder={t('User Person fulName search')}
-                                    id="react-select-single"
-                                    inputProps={{
-                                        classes,
-                                        name: 'react-select-single',
-                                        instanceId: 'react-select-single',
-                                        simpleValue: true,
-                                        options: suggestionsPerson
-                                    }}
-                                />
-                            </FormControl>
-
-                            <FormControl className={classes.formControl}>
-                                <TextField
-                                    disabled={!this.state.enableEditMode}
-                                    id="select-personInChargeFunction-native"
-                                    name="personInChargeFunctionId"
-                                    select
-                                    label={t('User Person function')}
-                                    className={classes.textField}
-                                    value={values.personInChargeFunctionId}
-                                    onChange={handleChange}
-                                    SelectProps={{
-                                        native: true,
-                                        MenuProps: {
-                                            className: classes.menu
-                                        }
-                                    }}
-                                    margin="normal"
-                                >
-                                    <option value="-1" />
-                                    {thesaurus[types.REALM_FUNCTION] && (
-                                        thesaurus[types.REALM_FUNCTION].map(option => (
-                                            <option key={option.id} value={option.codeValue}>
-                                                {option.designation}
-                                            </option>
-                                        ))
-                                    ) }
-                                </TextField>
-                            </FormControl>
-                        </Paper>
 
                         <br />
 
@@ -763,11 +763,11 @@ const UserForm = withFormik({
     // we can passe the default values props from the parent component - useful for edit
     enableReinitialize: true,
 
-    mapPropsToValues({ firstName, lastName, username, password, user }) {
+    mapPropsToValues({ username, lastName, password, user }) {
         return {
-            acronym:
-                user.data && user.data.acronym
-                    ? user.data.acronym
+            username:
+                user.data && user.data.username
+                    ? user.data.username
                     : '',
             name:
                 user.data && user.data.name ? user.data.name : '',
@@ -824,7 +824,7 @@ const UserForm = withFormik({
     },
     isInitialValid: (props)=> props.match.params.id ? true:false,
     validationSchema: () =>object().shape({
-        acronym: string().required(User_Acronym_is_required),
+        username: string().required(User_Username_is_required),
         name: string().required(User_Name_is_required),
         countryId: number().min(1).required(User_Country_is_required),
         personInChargeId: number().min(1).required(User_Person_In_Charge_is_required),
@@ -839,7 +839,7 @@ UserForm.propTypes = {
     classes: PropTypes.object.isRequired
 };
 const mapStateToProps = state => ({
-    user: state.user,
+    user: state.user ? state.user :{},
     thesaurus: state.thesaurus
 });
 
