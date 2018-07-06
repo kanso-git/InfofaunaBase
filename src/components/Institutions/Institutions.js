@@ -16,6 +16,7 @@ import cssUsers from './Institutions.css';
 import { translate, Trans } from 'react-i18next';
 import {connect} from "react-redux";
 import * as types from "../../store/actions/Types";
+import * as authHelper from "../../store/actions/AuthHelper";
 
 const NotificationSystem = require('react-notification-system');
 const styles = theme => ({
@@ -178,20 +179,23 @@ class Institutions extends Component {
             onChange={this.handleFiltered}
             margin="normal"
           />
-          <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title={t('Institution Add new institution')}>
-              <Button
-                variant="fab"
-                color="primary"
-                aria-label="add"
-                className={classes.button}
-                onClick={this.handleNew}
-              >
-                <AddIcon />
-              </Button>
-            </Tooltip>
-          </div>
-
+            {
+                authHelper.currentUserHasInfofaunaUserPermission() ? (
+                    <div style={{ float: 'right' }}>
+                        <Tooltip id="tooltip-fab" title={t('Institution Add new institution')}>
+                            <Button
+                                variant="fab"
+                                color="primary"
+                                aria-label="add"
+                                className={classes.button}
+                                onClick={this.handleNew}
+                            >
+                                <AddIcon />
+                            </Button>
+                        </Tooltip>
+                    </div>
+                ): null
+            }
           <div style={{ height: 20 }} />
           <ReactTable
             getTdProps={(state, rowInfo, column, instance) => {

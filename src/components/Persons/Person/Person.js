@@ -27,6 +27,7 @@ import withErrorHandler from '../../../components/withErrorHandler/withErrorHand
 import axios from '../../../axios-infofauna';
 import { personActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
+import * as authHelper from '../../../store/actions/AuthHelper';
 import { NavLink, Redirect } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Audit from "../../Audit/Audit";
@@ -261,22 +262,25 @@ class Person extends Component {
 
           </Typography>
 
-            {this.props.match.params.id ?
-          <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={this.state.enableEditMode}
-                    onChange={this.handleEnableEditMode}
-                    value="enableEditMode"
-                    color="primary"
-                  />
-                }
-                label= {t('Form Enable edit mode')}
-              />
-            </Tooltip>
-          </div> :''}
+            {
+                (this.props.match.params.id && authHelper.currentUserHasInfofaunaUserPermission() )?
+                  <div style={{ float: 'right' }}>
+                    <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={this.state.enableEditMode}
+                            onChange={this.handleEnableEditMode}
+                            value="enableEditMode"
+                            color="primary"
+                          />
+                        }
+                        label= {t('Form Enable edit mode')}
+                      />
+                    </Tooltip>
+                  </div> :''
+            }
+
             { this.props.match.params.id ?  <Audit {...auditData}/> :''}
           <Form>
             <br />
@@ -668,7 +672,7 @@ class Person extends Component {
 
             <br />
 
-            {this.state.enableEditMode && (
+            {(this.state.enableEditMode && authHelper.currentUserHasInfofaunaUserPermission()) && (
               <div style={{display:'flex',justifyContent:'flex-end'}}>
                 <Button
                   className={classes.button}

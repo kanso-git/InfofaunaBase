@@ -15,6 +15,7 @@ import cssProjects from './Projects.css';
 import { projectActions } from '../../store/actions';
 import { connect } from 'react-redux';
 import * as types from '../../store/actions/Types';
+import * as authHelper from "../../store/actions/AuthHelper";
 const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
@@ -204,19 +205,25 @@ class Projects extends Component {
             margin="normal"
           />
 
-          <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title={t('Project Add new project')}>
-              <Button
-                variant="fab"
-                color="primary"
-                aria-label="add"
-                className={classes.button}
-                onClick={this.handleNew}
-              >
-                <AddIcon />
-              </Button>
-            </Tooltip>
-          </div>
+            {
+              authHelper.currentUserHasInfofaunaUserPermission() ?
+                (
+                  <div style={{ float: 'right' }}>
+                      <Tooltip id="tooltip-fab" title={t('Project Add new project')}>
+                          <Button
+                              variant="fab"
+                              color="primary"
+                              aria-label="add"
+                              className={classes.button}
+                              onClick={this.handleNew}
+                          >
+                              <AddIcon />
+                          </Button>
+                      </Tooltip>
+                  </div>
+                ):null
+            }
+
 
           <div style={{ height: 20 }} />
           <ReactTable

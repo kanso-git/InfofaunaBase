@@ -15,7 +15,9 @@ import cssPersons from './Persons.css';
 import {personActions, thesaurusActions} from '../../store/actions';
 import { connect } from 'react-redux';
 import * as types from '../../store/actions/Types';
+import * as authHelper from '../../store/actions/AuthHelper';
 import withErrorHandler from "../withErrorHandler/withErrorHandler";
+
 const NotificationSystem = require('react-notification-system');
 
 const styles = theme => ({
@@ -189,19 +191,22 @@ class Persons extends Component {
             onChange={this.handleFiltered}
             margin="normal"
           />
-          <div style={{ float: 'right' }}>
-            <Tooltip id="tooltip-fab" title= {t('Person Add new person')}>
-              <Button
-                variant="fab"
-                color="primary"
-                aria-label="add"
-                className={classes.button}
-                onClick={this.handleNew}
-              >
-                <AddIcon />
-              </Button>
-            </Tooltip>
-          </div>
+            { authHelper.currentUserHasInfofaunaUserPermission() ?
+                <div style={{ float: 'right' }}>
+                    <Tooltip id="tooltip-fab" title= {t('Person Add new person')}>
+                        <Button
+                            variant="fab"
+                            color="primary"
+                            aria-label="add"
+                            className={classes.button}
+                            onClick={this.handleNew}
+                        >
+                            <AddIcon />
+                        </Button>
+                    </Tooltip>
+                </div> : null
+            }
+
 
           <div style={{ height: 20 }} />
           <ReactTable

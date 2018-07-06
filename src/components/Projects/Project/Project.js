@@ -42,6 +42,7 @@ import MaskedInput from 'react-text-mask';
 import NumberFormat from 'react-number-format';
 import Audit from "../../Audit/Audit";
 import Dialog from '../../Dialog/Dialog';
+import * as authHelper from "../../../store/actions/AuthHelper";
 const NotificationSystem = require('react-notification-system');
 
 
@@ -513,7 +514,7 @@ class Project extends Component {
                   <span className={classes.actualSite}> {t('Project Project Detail')}</span>
                   :  <span className={classes.actualSite}> {t('Project Project New')}</span> }
           </Typography>
-            {this.props.match.params.id ?
+            {(this.props.match.params.id && authHelper.currentUserHasInfofaunaUserPermission())?
           <div style={{ float: 'right' }}>
             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
               <FormControlLabel
@@ -1113,7 +1114,7 @@ class Project extends Component {
 
             <br />
 
-              {this.state.enableEditMode && (
+              {(this.state.enableEditMode && authHelper.currentUserHasInfofaunaUserPermission()) && (
                   <div style={{display:'flex',justifyContent:'flex-end'}}>
                       <Button
                           className={classes.button}

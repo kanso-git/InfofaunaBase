@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import { Form, withFormik } from 'formik';
 import { object, string, number } from 'yup';
@@ -25,13 +25,16 @@ import Spinner from '../../../components/UI/Spinner/Spinner';
 import axios from '../../../axios-infofauna';
 import { userActions, thesaurusActions } from '../../../store/actions';
 import * as types from '../../../store/actions/Types';
+import * as authHelper from '../../../store/actions/AuthHelper';
+
 import { NavLink, Redirect } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
+import green from '@material-ui/core/colors/green';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CancelIcon from '@material-ui/icons/Cancel';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+import Divider from '@material-ui/core/Divider';
 import ClearIcon from '@material-ui/icons/Clear';
 import Chip from '@material-ui/core/Chip';
 import Select from 'react-select';
@@ -39,6 +42,7 @@ import 'react-select/dist/react-select.css';
 import Audit from "../../Audit/Audit";
 import { translate, Trans } from 'react-i18next';
 import Dialog from '../../Dialog/Dialog';
+import Role from "./Roles/Role";
 const NotificationSystem = require('react-notification-system');
 
 let suggestionsPerson = [];
@@ -111,6 +115,47 @@ const styles = theme => ({
         flexGrow: 1,
         height: 250
     },
+
+    iOSSwitchBase: {
+        '&$iOSChecked': {
+            color: theme.palette.common.white,
+            '& + $iOSBar': {
+                backgroundColor: '#52d869',
+            },
+        },
+        transition: theme.transitions.create('transform', {
+            duration: theme.transitions.duration.shortest,
+            easing: theme.transitions.easing.sharp,
+        }),
+    },
+    iOSChecked: {
+        transform: 'translateX(15px)',
+        '& + $iOSBar': {
+            opacity: 1,
+            border: 'none',
+        },
+    },
+    iOSBar: {
+        borderRadius: 13,
+        width: 42,
+        height: 26,
+        marginTop: -13,
+        marginLeft: -21,
+        border: 'solid 1px',
+        borderColor: theme.palette.grey[400],
+        backgroundColor: theme.palette.grey[50],
+        opacity: 1,
+        transition: theme.transitions.create(['background-color', 'border']),
+    },
+    iOSIcon: {
+        width: 24,
+        height: 24,
+    },
+    iOSIconChecked: {
+        boxShadow: theme.shadows[1],
+    },
+
+
     chip: {
         margin: theme.spacing.unit / 4
     },
@@ -278,32 +323,28 @@ class User extends Component {
     componentDidMount() {
         console.log("componentDidMount...");
         this.notificationInput = React.createRef();
+        this.loadData();
+    }
+
+
+    loadData = async()=> {
         const { id } = this.props.match.params;
 
         if (id && !this.props.user.ongoingRequest && this.isNotTheSame()) {
-             this.props.initiateFetchUser();
-             this.loadThesaurusData();
-             this.props.loadUserPersonListData();
-             this.props.fetchUser(id);
+            this.props.initiateFetchUser();
+             await this.props.fetchUser(id);
+            this.props.loadRolesAndGroupsData(id);
+            this.props.loadUserAdditionalListData();
         }else if(!id){
             this.setState(()=>({
                 enableEditMode: true,
                 loading: true
             }))
-            this.loadThesaurusData();
-            this.props.loadUserPersonListData();
+            this.props.loadRolesAndGroupsData();
+            this.props.loadUserAdditionalListData();
             this.setState(()=>({
                 loading: false
             }))
-        }
-    }
-
-    loadThesaurusData = ()=> {
-        if (!this.props.thesaurus[types.REALM_COUNTRY]) {
-            this.props.fetchThesaurus(types.REALM_COUNTRY);
-        }
-        if (!this.props.thesaurus[types.REALM_FUNCTION]) {
-            this.props.fetchThesaurus(types.REALM_FUNCTION);
         }
     }
 
@@ -363,7 +404,110 @@ class User extends Component {
         setTimeout(()=>this.props.history.push('/users'), 200);
     }
 
+    renderAppRole = (role, roleGroups,setFieldValue)=>{
 
+        //roleList = roleList.filter(r => console.log((r.application.code+":"+r.name).toLowerCase()));
+
+        let selectedGroups =null;
+        const userRole = roleGroups.findIndex(r => r.roleId === role.id);
+        let userGroups =null;
+
+        console.log("role["+role.name+"] groupFlag:"+role.groupFlag);
+
+        if(role.groupFlag === types.USER_GRP_DEFINE){
+
+
+            selectedGroups =  this.props.user.groups.map( g => {
+
+                const  isSelected = roleGroups.findIndex(ug =>  ug.roleId === role.id && ug.groupId == g.id);
+
+                return {
+                    ...g,
+                    selected:isSelected !== -1
+                }
+
+            })
+
+        }
+
+
+        let isSameApp;
+        if(this.currentApp){
+            if(this.currentApp ===  role.application.code ){
+                isSameApp= true;
+            }else{
+                this.currentApp = role.application.code;
+                isSameApp= false;
+            }
+        }else {
+            this.currentApp = role.application.code;
+            isSameApp= false;
+        }
+
+
+        return <Role  disabled={!this.state.enableEditMode} key={role.id} {...role}  roleChange={(e)=>this.handleRoleChange(e,roleGroups,setFieldValue)} groupChangeAll={(e)=>this.handleGroupChangeAll(e,roleGroups,setFieldValue)} groupChange={(e)=>this.handleGroupChange(e,role.id,setFieldValue,roleGroups,this.props.user.groups)} isSelected={userRole !== -1 } isSameApp={isSameApp} groups={selectedGroups} />;
+    }
+
+
+    handleRoleChange =(e, roleGroups,setFieldValueFn)=>{
+        const {id, checked } = e.currentTarget;
+        const seelctedRole = this.props.user.roles.filter(r => r.id==id);
+
+       if(seelctedRole[0].groupFlag === types.NOT_APPLICABLE){
+           if(!checked){
+               const updateRoleGroups=  roleGroups.filter(rg => !(rg.roleId ==  id ) );
+               setFieldValueFn('roleGroups', updateRoleGroups)
+           }else{
+               let updateRoleGroups =roleGroups;
+               this.props.user.groups.map(g => {
+                   const groupALreadyExist = roleGroups.findIndex(rg => rg.roleId == id &&  rg.groupId == g.id);
+                   if(groupALreadyExist === -1){
+                       updateRoleGroups =[...updateRoleGroups,{id:-1,roleId:parseInt(id), groupId:parseInt(g.id)}];
+                   }
+
+               });
+               setFieldValueFn('roleGroups', updateRoleGroups)
+           }
+       }else{
+           if(!checked){
+               const updateRoleGroups=  roleGroups.filter(rg => !(rg.roleId ==  id ) );
+               setFieldValueFn('roleGroups', updateRoleGroups)
+           }
+       }
+    }
+    handleGroupChangeAll = (e, roleGroups,setFieldValueFn)=>{
+        const {id, checked } = e.currentTarget;
+        let updateRoleGroups =roleGroups;
+        if(checked){
+            this.props.user.groups.map(g => {
+                const groupALreadyExist = roleGroups.findIndex(rg => rg.roleId == id &&  rg.groupId == g.id);
+                if(groupALreadyExist === -1){
+                    updateRoleGroups =[...updateRoleGroups,{id:-1,roleId:parseInt(id), groupId:parseInt(g.id)}];
+                }
+
+            });
+            setFieldValueFn('roleGroups', updateRoleGroups)
+        }else{
+            updateRoleGroups=  roleGroups.filter(rg => !(rg.roleId ==  id ) );
+            setFieldValueFn('roleGroups', updateRoleGroups)
+        }
+
+    }
+    handleGroupChange =(e,roleId,setFieldValueFn,roleGroups,allGroups)=>{
+         const {id } = e.currentTarget;
+         const groupALreadyExist = roleGroups.findIndex(rg => rg.roleId === roleId &&  rg.groupId == id);
+         let updateRoleGroups ;
+         if(groupALreadyExist!== -1){
+             // if exist
+             updateRoleGroups=  roleGroups.filter(rg => !(rg.roleId ===  roleId && rg.groupId == id ) );
+         }else{
+             // not exist  add it
+             const groupToAdd = allGroups.find(rg => rg.id == id);
+             updateRoleGroups =[...roleGroups,{id:-1,roleId, groupId:groupToAdd.id}];
+         }
+         console.log(updateRoleGroups);
+        setFieldValueFn('roleGroups', updateRoleGroups)
+    }
     render() {
         console.log('user render .............');
         if (this.props.user.personsList) {
@@ -383,6 +527,7 @@ class User extends Component {
             handleChange,
             handleBlur,
             handleSubmit,
+            setFieldValue,
             isSubmitting,
             isValid,
             thesaurus,
@@ -406,7 +551,6 @@ class User extends Component {
         if(user.data){
             auditData={...user.data.auditDTO}
         }
-
 
         if (this.props.user.ongoingRequest || this.state.loading) {
             return (
@@ -440,7 +584,7 @@ class User extends Component {
                             :  <span className={classes.actualSite}> {t('User User New')}</span> }
                     </Typography>
 
-                    {this.props.match.params.id ?
+                    { (this.props.match.params.id &&  authHelper.currentUserHasInfofaunaManagerPermission())?
                         <div style={{ float: 'right' }}>
                             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
                                 <FormControlLabel
@@ -465,15 +609,15 @@ class User extends Component {
                             <Typography component="p">{t('User Info')}</Typography>
 
                             <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor="personInChargeId">*{t('User Person')}</InputLabel>
+                                <InputLabel htmlFor="person">{t('User Person')}</InputLabel>
                                 <Input
-                                    name="personInChargeId"
+                                    name="personId"
                                     disabled={!this.state.enableEditMode}
                                     inputComponent={SelectWrapped}
-                                    value={values.personInChargeId}
+                                    value={values.personId}
                                     className={classes.textField}
                                     onChange={b =>
-                                        this.props.setFieldValue('personInChargeId', b)
+                                        this.props.setFieldValue('personId', b)
                                     }
                                     onBlur={handleBlur}
                                     placeholder={t('User Person')}
@@ -513,136 +657,18 @@ class User extends Component {
                             </FormControl>
 
 
-                        </Paper>
-
-                        <Paper className={classes.root} elevation={1}>
-                            <Typography component="p">{t('User Name and acronym')}</Typography>
-
-                            <FormControl
-                                className={classes.formControl}
-                                error={touched.acronym && errors.acronym ? true : false}
-                            >
-                                <InputLabel htmlFor="acronym">*{t('User Acronym')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="acronym"
-                                    type="input"
-                                    name="acronym"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.acronym}
-                                />
-                                {touched.acronym &&
-                                errors.acronym && (
-                                    <FormHelperText id="acronym-text">
-                                        {errors.acronym}
-                                    </FormHelperText>
-                                )}
-                            </FormControl>
-
-                            <FormControl
-                                className={classes.formControl}
-                                error={touched.name && errors.name ? true : false}
-                            >
-                                <InputLabel htmlFor="name">*{t('User Name')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="name"
-                                    type="input"
-                                    name="name"
-                                    className={classes.textField}
-                                    style={{ width: 400 }}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                />
-                                {touched.name &&
-                                errors.name && (
-                                    <FormHelperText id="name-text">
-                                        {errors.name}
-                                    </FormHelperText>
-                                )}
-                            </FormControl>
-                        </Paper>
-
-                        <Paper className={classes.root} elevation={1}>
-                            <Typography component="h4">{t('User Address and contact')}</Typography>
-
-                            <FormControl
-                                className={classes.formControl}
-                                error={touched.address1 && errors.address1 ? true : false}
-                            >
-                                <InputLabel htmlFor="address1">{t('User Street and number')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="address1"
-                                    type="input"
-                                    name="address1"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.address1}
-                                />
-                            </FormControl>
-
-                            <FormControl
-                                className={classes.formControl}
-                                error={touched.address2 && errors.address2 ? true : false}
-                            >
-                                <InputLabel htmlFor="address2">{t('User Additional information')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="address2"
-                                    type="input"
-                                    name="address2"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.address2}
-                                />
-                            </FormControl>
-
-                            <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor="zipCode">{t('User Postal code')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="zipCode"
-                                    type="input"
-                                    name="zipCode"
-                                    style={{ width: 150 }}
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.zipCode}
-                                />
-                            </FormControl>
-
-                            <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor="locality">Localité</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="locality"
-                                    type="input"
-                                    name="locality"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.locality}
-                                />
-                            </FormControl>
-
-                            <FormControl className={classes.formControl}>
+                            <FormControl className={classes.formControl}  error={touched.languageId && errors.languageId ? true : false}>
                                 <TextField
                                     disabled={!this.state.enableEditMode}
-                                    id="select-pays-native"
-                                    name="countryId"
+                                    id="select-language-native"
+                                    name="languageId"
                                     select
-                                    label={t('User Country')}
+                                    label ={`*${t('Person Language')}`}
                                     className={classes.textField}
                                     style={{ width: 150 }}
-                                    value={values.countryId}
+                                    value={values.languageId}
                                     onChange={handleChange}
+                                    onBlur={handleBlur}
                                     SelectProps={{
                                         native: true,
                                         MenuProps: {
@@ -651,77 +677,113 @@ class User extends Component {
                                     }}
                                     margin="normal"
                                 >
-                                    <option value="-1" />
-                                    {thesaurus[types.REALM_COUNTRY] && (
-                                        thesaurus[types.REALM_COUNTRY].map(option => (
-                                            <option key={option.id} value={option.codeValue}>
+                                    <option value="-1"> </option>
+                                    {this.props.user.languagesList ? (
+                                        this.props.user.languagesList.map(option => (
+                                            <option key={option.id} value={option.id}>
                                                 {option.designation}
                                             </option>
                                         ))
-                                    ) }
+                                    ) : (
+                                        <option value="-1" />
+                                    )}
                                 </TextField>
-                            </FormControl>
-
-                            <FormControl className={classes.formControl}  error={touched.phone && errors.phone ? true : false}>
-                                <InputLabel htmlFor="phone">{t('User Phone')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="phone"
-                                    type="input"
-                                    name="phone"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.phone}
-                                />
-                                {touched.phone &&
-                                errors.phone && (
-                                    <FormHelperText id="phone-text">{errors.phone}</FormHelperText>
+                                {touched.languageId &&
+                                errors.languageId && (
+                                    <FormHelperText id="languageId-text">
+                                        {errors.languageId}
+                                    </FormHelperText>
                                 )}
                             </FormControl>
+                            <Divider/>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        id="ldap"
+                                        name="ldap"
+                                        disabled={!this.state.enableEditMode}
+                                        checked={values.ldap}
+                                        onChange={handleChange}
+                                        value={values.ldap.toString()}
+                                        classes={{
+                                            switchBase: classes.iOSSwitchBase,
+                                            bar: classes.iOSBar,
+                                            icon: classes.iOSIcon,
+                                            iconChecked: classes.iOSIconChecked,
+                                            checked: classes.iOSChecked,
+                                        }}
+                                        disableRipple
 
-                            <FormControl className={classes.formControl}  error={touched.fax && errors.fax ? true : false}>
-                                <InputLabel htmlFor="mobilePhone">{t('User Fax')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="fax"
-                                    type="input"
-                                    name="fax"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.fax}
-                                />
-                                {touched.fax &&
-                                errors.fax && (
-                                    <FormHelperText id="fax-text">{errors.fax}</FormHelperText>
-                                )}
-                            </FormControl>
+                                    />
+                                }
+                                label={t('Authenticated by LDAP')}
+                            />
 
-                            <FormControl className={classes.formControl} error={touched.url && errors.url ? true : false}>
-                                <InputLabel htmlFor="url">{t('User Url')}</InputLabel>
-                                <Input
-                                    disabled={!this.state.enableEditMode}
-                                    id="url"
-                                    type="input"
-                                    name="url"
-                                    className={classes.textField}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.url}
-                                />
-                                {touched.url &&
-                                errors.url && (
-                                    <FormHelperText id="url-text">{errors.url}</FormHelperText>
-                                )}
-                            </FormControl>
+                            {!values.ldap ? <Fragment>
+                                <FormControl
+                                    className={classes.formControl}
+                                    error={touched.password && errors.password ? true : false}
+                                >
+                                    <InputLabel htmlFor="password">*{t('User Password')}</InputLabel>
+                                    <Input
+                                        disabled={!this.state.enableEditMode}
+                                        id="password"
+                                        type="input"
+                                        name="password"
+                                        className={classes.textField}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.password}
+                                    />
+                                    {touched.password &&
+                                    errors.password && (
+                                        <FormHelperText id="password-text">
+                                            {errors.password}
+                                        </FormHelperText>
+                                    )}
+                                </FormControl>
+
+                                <FormControl
+                                    className={classes.formControl}
+                                    error={touched.passwordConfirm && errors.passwordConfirm ? true : false}
+                                >
+                                    <InputLabel htmlFor="name">*{t('User Confirm Password')}</InputLabel>
+                                    <Input
+                                        disabled={!this.state.enableEditMode}
+                                        id="passwordConfirm"
+                                        type="input"
+                                        name="passwordConfirm"
+                                        className={classes.textField}
+                                        style={{ width: 400 }}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.passwordConfirm}
+                                    />
+                                    {touched.passwordConfirm &&
+                                    errors.passwordConfirm && (
+                                        <FormHelperText id="passwordConfirm-text">
+                                            {errors.passwordConfirm}
+                                        </FormHelperText>
+                                    )}
+                                </FormControl>
+                            </Fragment> :""}
+
+
 
                         </Paper>
 
+                        <Paper className={classes.root} elevation={1}>
+                            <Typography component="p">Roles</Typography>
+                            {
+                                this.props.user.roles  ?  this.props.user.roles
+                                    .sort((a,b) =>  ('' + a.application.code +a.name).localeCompare(b.application.code+b.name))
+                                    .map((r)=> this.renderAppRole(r,values.roleGroups,setFieldValue)) : ""
 
+                            }
+                            <br/>
+                        </Paper>
                         <br />
-
-                        {this.state.enableEditMode && (
+                        {(this.state.enableEditMode &&  authHelper.currentUserHasInfofaunaManagerPermission())&& (
                             <div style={{display:'flex',justifyContent:'flex-end'}}>
                                 <Button
                                     className={classes.button}
@@ -763,57 +825,32 @@ const UserForm = withFormik({
     // we can passe the default values props from the parent component - useful for edit
     enableReinitialize: true,
 
-    mapPropsToValues({ username, lastName, password, user }) {
+    mapPropsToValues({ user }) {
         return {
             username:
                 user.data && user.data.username
                     ? user.data.username
                     : '',
-            name:
-                user.data && user.data.name ? user.data.name : '',
-            address1:
-                user.data && user.data.address1
-                    ? user.data.address1
-                    : '',
-            address2:
-                user.data && user.data.address2
-                    ? user.data.address2
-                    : '',
-
-            zipCode:
-                user.data && user.data.zipCode
-                    ? user.data.zipCode
-                    : '',
-            locality:
-                user.data && user.data.locality
-                    ? user.data.locality
-                    : '',
-
-            countryId:
-                user.data && user.data.countryId
-                    ? user.data.countryId
-                    : -1,
-            personInChargeId:
-                user.data && user.data.personInChargeId
-                    ? user.data.personInChargeId
-                    : -1,
-            personInChargeFunctionId:
-                user.data && user.data.personInChargeFunctionId
-                    ? user.data.personInChargeFunctionId
-                    : -1,
-
-            phone:
-                user.data && user.data.phone
-                    ? user.data.phone
-                    : '',
-            fax: user.data && user.data.fax ? user.data.fax : '',
-            url: user.data && user.data.url ? user.data.url : ''
+            personId:
+                user.data && user.data.person ? user.data.person.id : '',
+            languageId:
+                user.data && user.data.languageId ? user.data.languageId :'',
+            ldap:
+                user.data && user.data.ldap
+                    ? user.data.ldap
+                    : false,
+            roleGroups:
+                user.data && user.data.roleGroups
+                    ? user.data.roleGroups
+                    : []
         };
     },
     async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-        console.log(JSON.stringify(values, null,3));
+        console.log("**************************");
+
         if(props.match.params.id){
             const { id } = props.match.params;
+            console.log(JSON.stringify(values, null,3));
             await props.updateUser(id, values);
             await props.fetchUser(id);
             setSubmitting(false);
@@ -824,14 +861,7 @@ const UserForm = withFormik({
     },
     isInitialValid: (props)=> props.match.params.id ? true:false,
     validationSchema: () =>object().shape({
-        username: string().required(User_Username_is_required),
-        name: string().required(User_Name_is_required),
-        countryId: number().min(1).required(User_Country_is_required),
-        personInChargeId: number().min(1).required(User_Person_In_Charge_is_required),
-        personInChargeFunctionId:number().min(1).required(User_Person_In_Charge_Function_is_required),
-        phone: string().min(10, User_Phone_format_is_invalid),
-        fax: string().min(10, User_Phone_format_is_invalid),
-        url: string().url(User_Url_format_is_invalid)
+        username: string().required(User_Username_is_required)
     })
 })(User);
 

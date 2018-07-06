@@ -4,7 +4,6 @@ import createHistory from 'history/createBrowserHistory';
 import PrivateRoute from './PrivateRoute';
 import PublicRoute from './PublicRoute';
 import Login from '../containers/Login/Login';
-import {LOCAL_STORAGE_USER_KEY} from '../store/actions/Types';
 import {authActions} from '../store/actions';
 import {connect} from 'react-redux';
 import NotFoundPage from '../components/NotFoundPage/NotFoundPage';
@@ -18,10 +17,9 @@ import Person from '../components/Persons/Person/Person';
 import Project from '../components/Projects/Project/Project';
 import Institution from '../components/Institutions/Institution/Institution';
 import User from "../components/Users/User/User";
+import {loadCurrentUserFromLocalStorage} from "../store/actions/AuthHelper";
 
-const loadCurrentUserFromLocalStorage = () => {
-    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_KEY));
-};
+
 
 export const history = createHistory();
 
