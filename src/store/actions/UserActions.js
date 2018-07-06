@@ -154,13 +154,22 @@ const loadRolesAndGroupsData = (userId)=> async(dispatch, getState) => {
                 const currentUser =  authHelper.getCurrentUser();
                 const userDataManagerRoles = userData.permissions.filter( p => p.indexOf(":manager")  !== -1) ;
                 const userDataHasInfofaunaManagerRole = userDataManagerRoles.indexOf("infofauna:manager") !== -1 ? true: false;
+                if(userDataManagerRoles.length>0){
+                    roleList = roleList.map(r => ({
+                        ...r,
+                        readOnly: userDataHasInfofaunaManagerRole === true ?
+                            (r.application.code+":"+r.name).toLowerCase() === "infofauna:manager" :
+                            userDataManagerRoles.indexOf((r.application.code+":"+r.name).toLowerCase()) !== -1 ? true: false
+                    }))
+                }else{
+                    // no manager roles
+                    roleList = roleList.map(r => ({
+                        ...r,
+                        readOnly:  authHelper.currentUserHasPermission((r.application.code+":"+r.name).toLowerCase())
 
-                roleList = roleList.map(r => ({
-                    ...r,
-                    readOnly: userDataHasInfofaunaManagerRole === true ?
-                        (r.application.code+":"+r.name).toLowerCase() === "infofauna:manager" :
-                        userDataManagerRoles.indexOf((r.application.code+":"+r.name).toLowerCase()) !== -1 ? true: false
-                }))
+                    }))
+                }
+
 
                 // modify case : user exist
                 if(userId){
