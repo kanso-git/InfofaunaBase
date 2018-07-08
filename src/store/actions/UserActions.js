@@ -151,6 +151,9 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
       );
 
       const currentUser = authHelper.getCurrentUser(); //logged user
+      const currentUserManagerRoles = currentUser.permissions.filter(
+        p => p.indexOf(':manager') !== -1
+      );
 
       if (authHelper.currentUserHasInfofaunaManagerPermission()) {
         // case : view or modify existing user
@@ -193,10 +196,17 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
           );
         }
       } else if (
-        authHelper.currentUserHasMdsManagerPermission() ||
-        authHelper.currentUserHasMidatManagerPermission()
+        !authHelper.currentUserHasInfofaunaManagerPermission() &&
+        currentUserManagerRoles.length > 0
       ) {
+        // case : view or modify existing user
+        if (userId) {
+        } else {
+          // case add new ; we can only add users with the user profile
+          // filter out infofauna:* and all the manager roles on the other apps
+        }
       } else {
+        // it's a normal user without any manager role, so it should not have any access to modify only read
       }
 
       /*
