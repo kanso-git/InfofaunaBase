@@ -372,7 +372,7 @@ class Project extends Component {
     }
 
     componentWillReceiveProps(nextProps){
-        console.log('componentWillReceiveProps .............');
+        // console.log('componentWillReceiveProps .............');
         if( nextProps.project.opreationType === types.ADD_OPREATION_TYPE ){
             const {id} = nextProps.match.params;
             if(id && id != this.props.match.params.id){
@@ -1253,7 +1253,7 @@ const ProjectForm = withFormik({
   },
 
     async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-        console.log(JSON.stringify(values, null,3));
+        // console.log(JSON.stringify(values, null,3));
         if(props.match.params.id){
             const { id } = props.match.params;
             await props.updateProject(id, values);

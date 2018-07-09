@@ -112,7 +112,7 @@ class Person extends Component {
 
 
   componentDidMount() {
-    console.log('componentDidMount .............');
+      // console.log('componentDidMount .............');
     this.notificationInput = React.createRef();
     const { id } = this.props.match.params;
 
@@ -158,7 +158,7 @@ class Person extends Component {
       return true;
   }
   componentWillReceiveProps(nextProps){
-    console.log('componentWillReceiveProps .............');
+      // console.log('componentWillReceiveProps .............');
     if( nextProps.person.opreationType === types.ADD_OPREATION_TYPE ){
           const {id} = nextProps.match.params;
           if(id && id != this.props.match.params.id){
@@ -746,7 +746,7 @@ const PersonForm = withFormik({
     };
   },
   async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-      console.log(JSON.stringify(values, null,3));
+      // console.log(JSON.stringify(values, null,3));
       if(props.match.params.id){
           const { id } = props.match.params;
           await props.updatePerson(id, values);

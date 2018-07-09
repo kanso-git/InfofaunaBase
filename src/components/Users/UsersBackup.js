@@ -75,7 +75,7 @@ class Users extends Component {
       .map(k => `${k}=${params[k]}`)
       .join('&');
     const url = `/api/users/?${reqParam}`;
-    console.log(url);
+      //  console.log(url);
     const res = await axios.get(url);
     return res;
   };

@@ -70,27 +70,27 @@ const fetchProjectsListAxios = async () => {
 
 const fetchPersonsListAxios = async () => {
     const url = `/api/persons/list`;
-    console.log(`fetchPersonsListAxios url:${url}`);
+    // console.log(`fetchPersonsListAxios url:${url}`);
     return axios.get(url);
 };
 
 const fetchInstitutionsListAxios = async () => {
     const url = `/api/institutions/list`;
-    console.log(`fetchInstitutionsListAxios url:${url}`);
+    // console.log(`fetchInstitutionsListAxios url:${url}`);
     return axios.get(url);
 };
 
 const updateProjectAxios = async (id, updatedProject) => {
     const url = `/api/projects/${id}`;
     prepareDataHelper(updatedProject)
-    console.log(`updateProjectAxios url:${url} ,updatedProject:${JSON.stringify(updatedProject, null, 3)} `);
+    //  console.log(`updateProjectAxios url:${url} ,updatedProject:${JSON.stringify(updatedProject, null, 3)} `);
     return axios.put(url, updatedProject);
 };
 
 const addNewProjectAxios = async (project) => {
     const url = `/api/projects/`;
     prepareDataHelper(project)
-    console.log(`addNewProjectAxios url:${JSON.stringify(project, null, 3)}`);
+    // console.log(`addNewProjectAxios url:${JSON.stringify(project, null, 3)}`);
     return axios.post(url, project);
 };
 

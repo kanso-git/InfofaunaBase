@@ -19,7 +19,10 @@ import classNames from 'classnames';
 import SwitchCtrl from '../UI/SwitchCtrl';
 import * as types from '../../../../store/actions/Types';
 import Divider from '@material-ui/core/es/Divider/Divider';
-import RadioButtonChecked from '@material-ui/icons/RadioButtonChecked';
+import CheckCircle from '@material-ui/icons/CheckCircle';
+import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
+import Lock from '@material-ui/icons/Lock';
+
 
 const styles = theme => ({
   root: {
@@ -71,11 +74,7 @@ class Role extends Component {
             <FormControlLabel
               control={
                 <SwitchCtrl
-                  checked={
-                    groups.filter(g => g.selected === false).length > 0
-                      ? false
-                      : true
-                  }
+                  checked={!groups.filter(g => g.selected === false).length > 0}
                   writeFalg
                   exportFalg={this.props.name === 'USER' ? true : false}
                   id={'' + this.props.id}
@@ -127,33 +126,65 @@ class Role extends Component {
       return '';
     }
   };
+  renderSelectionIndicator = () =>{
 
+      if(this.props.readOnly || this.props.readOnlyAndSelected){
+         if(this.props.isSelected || this.props.readOnlyAndSelected){
+             return (
+                 <Fragment>
+                   <Lock  style={{ color: 'orange', fontSize: 28, opacity:0.6, marginTop: 10, marginRight: 10 }} />
+                     <SwitchCtrl
+                         checked={true}
+                         id={'' + this.props.id}
+                         disabled={true}
+                         label={this.props.application.code + ' / ' + this.props.name}
+                     />
+                  <span className={this.props.classes.secondaryHeading}>
+                    {this.props.application.code + ' / ' + this.props.name}
+                  </span>&nbsp;&nbsp;
+                 </Fragment>
+             )
+         }else{
+          // read only but not selected
+             return (
+                 <Fragment>
+                     <Lock  style={{ color: 'orange', fontSize: 28, opacity:0.6, marginTop: 10, marginRight: 10 }} />
+                     <SwitchCtrl
+                         checked={false}
+                         id={'' + this.props.id}
+                         disabled={true}
+                         label={this.props.application.code + ' / ' + this.props.name}
+                     />
+                     <span className={this.props.classes.secondaryHeading}>
+                    {this.props.application.code + ' / ' + this.props.name}
+                  </span>&nbsp;&nbsp;
+                 </Fragment>
+             )
+         }
+
+      }else {
+        // means readOnly is false and readOnlyAndSelected is false or null
+         return (
+             <Fragment>
+               <SwitchCtrl
+                   checked={this.props.isSelected}
+                   id={'' + this.props.id}
+                   disabled={this.props.disabled}
+                   handleChange={this.props.roleChange}
+                   label={this.props.application.code + ' / ' + this.props.name}
+                   extraMagrinLeft
+               />
+             </Fragment>
+         )
+      }
+  }
   renderCustomPanel = () => {
     const { isSelected, classes } = this.props;
     if (this.props.groupFlag !== types.USER_GRP_DEFINE) {
       return (
         <ExpansionPanel defaultExpanded={true} expanded={true}>
           <ExpansionPanelSummary>
-            {this.props.readOnly ? (
-              <Fragment>
-                <RadioButtonChecked
-                  style={{ color: 'gray', marginTop: 10, marginRight: 5 }}
-                />
-                <span className={classes.secondaryHeading}>
-                  {' '}
-                  {this.props.application.code + ' / ' + this.props.name}
-                </span>&nbsp;&nbsp;
-              </Fragment>
-            ) : (
-              <SwitchCtrl
-                checked={isSelected}
-                id={'' + this.props.id}
-                disabled={this.props.disabled}
-                handleChange={this.props.roleChange}
-                label={this.props.application.code + ' / ' + this.props.name}
-              />
-            )}
-
+            { this.renderSelectionIndicator()}
             <Typography className={classes.secondaryHeading}>
               {this.props.description}
             </Typography>
@@ -175,6 +206,7 @@ class Role extends Component {
                 this.props.name +
                 this.renderGroupNameOrNumber()
               }
+              extraMagrinLeft
             />
           </ExpansionPanelSummary>
           {this.renderGroupInfo(this.props.groupFlag, this.props.groups)}

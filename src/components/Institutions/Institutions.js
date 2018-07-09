@@ -57,7 +57,7 @@ class Institutions extends Component {
 
     componentDidMount(){
         this.notificationInput = React.createRef();
-        console.log(this.props.opreationType);
+        //  console.log(this.props.opreationType);
         if(this.props.opreationType && this.props.opreationType === types.DELETE_OPREATION_TYPE){
             const { t } = this.props;
             setTimeout(()=>this.addNofification(
@@ -77,7 +77,7 @@ class Institutions extends Component {
       return decodeURIComponent(name[1]);
   };
   handleOpen = id => {
-    console.log(`handleOpen :: open the details of inistitution with id:${id}`);
+      //  console.log(`handleOpen :: open the details of inistitution with id:${id}`);
     this.props.history.push('/institutions/' + id);
   };
 
@@ -122,7 +122,7 @@ class Institutions extends Component {
     const reqParam = Object.keys(params)
       .map(k => `${k}=${params[k]}`)
       .join('&');
-    console.log(reqParam);
+      // console.log(reqParam);
     const res = await axios.get(`/api/institutions/?${reqParam}`);
     return res;
   };

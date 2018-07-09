@@ -58,13 +58,13 @@ const fetchUserRolesAndGroupsAction = payload => ({
 // axios
 const fetchUserAxios = async id => {
   const url = `/api/users/${id}`;
-  console.log(`fetchUserAxios url:${url}`);
+    // console.log(`fetchUserAxios url:${url}`);
   return axios.get(url);
 };
 
 const fetchPersonsListAxios = async () => {
   const url = `/api/persons/list`;
-  console.log(`fetchPersonsListAxios url:${url}`);
+    // console.log(`fetchPersonsListAxios url:${url}`);
   return axios.get(url);
 };
 
@@ -140,138 +140,179 @@ const loadUserAdditionalListData = () => async (dispatch, getState) => {
 
 const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
   try {
-    let roleList = getState().user.roles;
-    let userData = getState().user.data;
+        let roleList = getState().user.roles;
+        let userData = getState().user.data;
+        let enableDelete = false;
 
-    try {
-      const roleListAxios = await fetchRoleListAxios();
-      // manage the export role inside the user role
-      roleList = roleListAxios.data.filter(
-        g => g.name.indexOf('EXPORT') === -1
-      );
+        try {
+          const roleListAxios = await fetchRoleListAxios();
 
-      const currentUser = authHelper.getCurrentUser(); //logged user
-      const currentUserManagerRoles = currentUser.permissions.filter(
-        p => p.indexOf(':manager') !== -1
-      );
-
-      if (authHelper.currentUserHasInfofaunaManagerPermission()) {
-        // case : view or modify existing user
-        if (userId) {
-          const userDataManagerRoles = userData.permissions.filter(
-            p => p.indexOf(':manager') !== -1
+          // manage the export role inside the user role
+          roleList = roleListAxios.data.filter(
+            g => g.name.indexOf('EXPORT') === -1
           );
-          const userDataHasInfofaunaManagerRole =
-            userDataManagerRoles.indexOf('infofauna:manager') !== -1
-              ? true
-              : false;
 
-          if (userDataHasInfofaunaManagerRole) {
-            // view or modify my owen user or another user (user has infofauna:manager role)
-            // i can only add or remove  rights for none infofauna app user.
-            roleList = roleList.map(r => ({
-              ...r,
-              owned:
-                r.application.code.toLowerCase() === 'infofauna'
-                  ? true
-                  : r.name.toLowerCase() === 'manager'
-                    ? true
-                    : false
-            }));
-          } else {
-            // view or modify another user (user doesn't have infofauna:manager role)
-            // you can add/remove any role except you can't add infofauna:manager role
-            roleList = roleList.filter(
-              r =>
-                (r.application.code + ':' + r.name).toLowerCase() !==
-                'infofauna:manager'
-            );
-          }
-        } else {
-          // case : add new , can add all except infofauna manager
-          roleList = roleList.filter(
-            r =>
-              (r.application.code + ':' + r.name).toLowerCase() !==
-              'infofauna:manager'
-          );
-        }
-      } else if (
-        !authHelper.currentUserHasInfofaunaManagerPermission() &&
-        currentUserManagerRoles.length > 0
-      ) {
-        // case : view or modify existing user
-        if (userId) {
-        } else {
-          // case add new ; we can only add users with the user profile
-          // filter out infofauna:* and all the manager roles on the other apps
-        }
-      } else {
-        // it's a normal user without any manager role, so it should not have any access to modify only read
-      }
+          if (authHelper.currentUserHasInfofaunaManagerPermission()) {
+            // case : view or modify existing user
+            if (userId) {
 
-      /*
+              const userDataHasInfofaunaManagerRole = userData.permissions.findIndex(p =>p.endsWith('infofauna:manager'));
+              if (userDataHasInfofaunaManagerRole !== -1) {
+                // currentUser InfofaunaManagerRole =>  dataUser InfofaunaManagerRole
+                // view or modify my his owen user or another user (user has infofauna:manager role)
+                // current connected user (infofauna:manager) can only add or remove user rights expect for infofauna.
 
-                // modify case : user exist
-                if(userId){
-                    if(currentUser.userId == userId){
-                     // view my user
+                roleList = roleList.map(r => ({
+                  ...r,
+                  readOnlyAndSelected: (r.application.code.toLowerCase() === 'infofauna' || r.name.toLowerCase() === 'manager')
+                }));
 
-                        if(userDataManagerRoles.length>0){
-                            if(userDataHasInfofaunaManagerRole){
-                                roleList = roleList.map(r => ({
-                                    ...r,
-                                    readOnly: (r.application.code+":"+r.name).toLowerCase() === "infofauna:manager"
-                                }))
-                            }else{
-                                roleList = roleList.map(r => ({
-                                    ...r,
-                                    readOnly: userDataManagerRoles.indexOf((r.application.code+":"+r.name).toLowerCase()) !== -1
-                                }))
-                            }
+                  // currentUser profile = dataUser profile
+                  enableDelete = false;
+              } else {
+                // currentUser InfofaunaManagerRole =>  dataUser doesn't have InfofaunaManagerRole
+                // view or modify another user (user doesn't have infofauna:manager role)
+                // current connected user (user has infofauna:manager role) can add/remove any role except you can't add infofauna:manager role
 
+                  roleList = roleList.map(r => ({
+                      ...r,
+                      readOnly:  (r.application.code + ':' + r.name).toLowerCase() ===  'infofauna:manager'
+                  }));
+
+                  // currentUser profile > data user profile
+                  enableDelete = true;
+              }
+            } else {
+              // case : add new , can give all roles to the new created user  except infofauna manager role
+                roleList = roleList.map(r => ({
+                    ...r,
+                    readOnly:  (r.application.code + ':' + r.name).toLowerCase() ===  'infofauna:manager'
+                }));
+            }
+          } else if (authHelper.currentUserManagerPermissionsArray().length > 0) {
+            // case : view or modify existing user ( e.g logged user with mds manager role )
+            if (userId) {
+                const userDataHasInfofaunaManagerRole = userData.permissions.findIndex(p =>p.endsWith('infofauna:manager'));
+                if(userDataHasInfofaunaManagerRole !== -1){
+                    // currentUser has AppManagerRole =>  dataUser InfofaunaManagerRole
+                    // view or modify  another user (another user has infofauna:manager role)
+                    roleList = roleList.map(r => ({
+                        ...r,
+                        readOnlyAndSelected: !(r.application.code.toLowerCase() === 'infofauna' || r.name.toLowerCase() === 'manager')
+                    }));
+                    // current connected user (app:manager ) can only add/remove  user rights for the app manager he owens
+                    roleList = roleList.map(r=>{
+                      if( r.name.toLowerCase() === "user"){
+                        if(authHelper.currentUserManagerPermissionsArray().indexOf((r.application.code + ':manager').toLowerCase()) !== -1){
+                          return r; // he can add this role since he has the manager of this user
                         }else{
-                            // no manager roles
-                            roleList = roleList.map(r => ({
-                                ...r,
-                                readOnly:  authHelper.currentUserHasPermission((r.application.code+":"+r.name).toLowerCase())
-
-                            }))
+                          // add readOnly flag since he dosen't have the manager of this user
+                          return {
+                              ...r,
+                              readOnly: true
+                          }
                         }
-                        if(authHelper.currentUserHasInfofaunaManagerPermission()){
-                            roleList = roleList.filter(r => {
-                                const appRole = (r.application.code+":"+r.name).toLowerCase();
-                                return  authHelper.currentUserHasPermission(appRole)
-                            });
-                        }else{
-
-                        }
-
-                    }else{
-                        // view another user
-                        if(authHelper.currentUserHasInfofaunaManagerPermission()){
-                            roleList = roleList.filter(r => {
-                                const appRole = (r.application.code+":"+r.name).toLowerCase();
-                                return  authHelper.currentUserHasPermission(appRole)
-                            });
-
-                        }else {
-                            roleList = roleList.filter(r => {
-                                const userSlectedRole = userData.roleGroups.findIndex(up => up.roleId === r.id);
-                                return userSlectedRole !== -1 ;
-                            });
-                        }
-
-                    }
+                      }else{
+                        return r ; // since the manager is already flagged with readOnlyAndSelected
+                      }
+                    });
+                    // currentUser  profile < data user profile
+                    enableDelete = false;
                 }else {
+                    // currentUser has AppManagerRole =>  dataUser has AppManagerRole or AppUserRole
+                    // view or modify its user or another user (user doesn't have infofauna:manager role)
+                    // current connected user (user has app:manager role) can add/remove user roles for the app manager he owens
 
+                     // 1. enables apps where current user is not a manager on them
+                      roleList = roleList.map(r=>{
+                          if( r.name.toLowerCase() === "user"){
+                              if(authHelper.currentUserManagerPermissionsArray().indexOf((r.application.code + ':manager').toLowerCase()) !== -1){
+                                  return r; // he can add this role since he has the manager of this user
+                              }else{
+                                  // add readOnly flag since he dosen't have the manager of this user
+                                  return {
+                                      ...r,
+                                      readOnly: true
+                                  }
+                              }
+                          }else{
+                              return {
+                                  ...r,
+                                  readOnly: true
+                              };
+                          }
+                      });
+
+                      // check if dataUser has an appManager role
+                      const userDataAppManagerRoleList = userData.permissions.filter(p =>p.endsWith(':manager'));
+                      if(userDataAppManagerRoleList.length>0){
+                          // currentUser  profile == data user profile
+                          enableDelete = false;
+                      }else{
+                          // currentUser  profile > data user profile
+                          enableDelete = true;
+                      }
                 }
-*/
-    } catch (e) {
-      console.log('loadRolesAndGroupsData error in getting the roleList');
-      console.log(e);
-      roleList = [];
-    }
+            } else {
+              // case add new user.
+                // currentUser has AppManagerRole => currentUser can creates
+                roleList = roleList.map(r=>{
+                    if( r.name.toLowerCase() === "user"){
+                        if(authHelper.currentUserManagerPermissionsArray().indexOf((r.application.code + ':manager').toLowerCase()) !== -1){
+                            return r; // he can add this role since he has the manager of this user
+                        }else{
+                            // add readOnly flag since he dosen't have the manager of this user
+                            return {
+                                ...r,
+                                readOnly: true
+                            }
+                        }
+                    }else{
+                        // since the manager is already flagged with readOnly
+                        return {
+                            ...r,
+                            readOnly: true
+                        };
+                    }
+                });
 
+            }
+          } else {
+              // currentUser is an infofaunaUser =>  can't add or modify
+              if (userId) {
+
+                  const userDataHasInfofaunaManagerRole = userData.permissions.findIndex(p =>p.endsWith('infofauna:manager'));
+                  if (userDataHasInfofaunaManagerRole !== -1) {
+                      // currentUser is an infofaunaUser =>  dataUser InfofaunaManagerRole
+                      roleList = roleList.map(r => ({
+                          ...r,
+                          readOnlyAndSelected: (r.application.code.toLowerCase() === 'infofauna' || r.name.toLowerCase() === 'manager'),
+                          readOnly: true
+                      }));
+
+                  } else {
+                      // currentUser is an infofaunaUser =>  dataUser doesn't have InfofaunaManagerRole
+                      roleList = roleList.map(r=>({
+                          ...r,
+                          readOnly: true
+                      }));
+                  }
+              }else{
+                  roleList = roleList.map(r=>({
+                      ...r,
+                      readOnly: true
+                  }));
+              }
+              enableDelete = false;
+          }
+        } catch (e) {
+          console.log('loadRolesAndGroupsData error in getting the roleList');
+          console.log(e);
+          roleList = [];
+        }
+
+        console.log(" roleList after >>>>>>>>>>");
+        console.log(JSON.stringify(roleList,null,3));
     let groupList = getState().user.groups;
     if (!groupList) {
       try {
@@ -285,7 +326,8 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
     }
     const userRolesAndGroupsAction = fetchUserRolesAndGroupsAction({
       roles: roleList,
-      groups: groupList
+      groups: groupList,
+      enableDelete: enableDelete
     });
     dispatch(userRolesAndGroupsAction);
   } catch (e) {

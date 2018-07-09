@@ -52,7 +52,7 @@ const styles = theme => ({
 
 
 const Dashboard = (props) => {
-    console.log(props);
+    // console.log(props);
     const {t, i18n} = props;
     const {classes} = props;
     return (

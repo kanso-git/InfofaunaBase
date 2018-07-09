@@ -10,7 +10,7 @@ const initialState = {
 const personReducer = (state = initialState, action) => {
     switch (action.type) {
         case types.PREPARE_PERSON_FORM_FOR_ADD:
-            console.log('personReducer PREPARE_FORM_FOR_ADD');
+            // console.log('personReducer PREPARE_FORM_FOR_ADD');
             return {...initialState}
         case types.INITIATE_FETCH_PERSON:
             return {...state, ongoingRequest: true, opreationType:null};

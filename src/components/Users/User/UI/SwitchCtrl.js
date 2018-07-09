@@ -59,7 +59,8 @@ class SwitchCtrl extends React.Component {
 
     render(){
         const { classes } = this.props;
-        const {checked, handleChange, disabled,label, id, name, writeFalg, exportFalg} = this.props;
+        const {checked, handleChange,extraMagrinLeft, disabled,label, id, name, writeFalg, exportFalg} = this.props;
+        const style = extraMagrinLeft? {marginLeft:30} :{}
         return (
             <Fragment>
                 <FormControlLabel
@@ -82,6 +83,8 @@ class SwitchCtrl extends React.Component {
                         />
                     }
                     label={label}
+                    style={style}
+
                 />
                 {exportFalg? (
                 <FormControlLabel

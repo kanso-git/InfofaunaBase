@@ -10,7 +10,7 @@ const fetchThesaurusAction = payload => ({
 // axios
 const fetchThesaurusAxios = async (code) => {
     const url =`/api/thesaurus/list/?code=${code}`;
-    console.log(`fetchThesaurusAxios url:${url}`);
+    // console.log(`fetchThesaurusAxios url:${url}`);
     return axios.get(url);
 };
 

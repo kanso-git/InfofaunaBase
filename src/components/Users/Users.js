@@ -79,7 +79,7 @@ class Users extends Component {
       return decodeURIComponent(name[1]);
   };
   handleOpen = id => {
-    console.log(`handleOpen :: open the details of user with id:${id}`);
+      // console.log(`handleOpen :: open the details of user with id:${id}`);
     this.props.history.push('/users/' + id);
   };
 
@@ -169,7 +169,7 @@ class Users extends Component {
   };
 
   render() {
-    console.log(this.props)
+      // console.log(this.props)
     const { classes } = this.props;
     const {t,i18n } = this.props;
     const { data, pages, loading } = this.state;

@@ -49,26 +49,26 @@ const errorAddingNewPersonAction = payload => ({
 // axios
 const fetchPersonAxios = async (id) => {
   const url =`/api/persons/${id}`;
-  console.log(`fetchPersonAxios url:${url}`);
+    // console.log(`fetchPersonAxios url:${url}`);
   return axios.get(url);
 };
 
 const updatePersonAxios = async (id, updatedPerson) => {
     const url =`/api/persons/${id}`;
-    console.log(`updatePersonAxios url:${url} ,updatedPerson:${JSON.stringify(updatedPerson,null,3)} `);
+    // console.log(`updatePersonAxios url:${url} ,updatedPerson:${JSON.stringify(updatedPerson,null,3)} `);
     return axios.put(url,updatedPerson);
 };
 
 const addNewPersonAxios = async (person) => {
     const url =`/api/persons/`;
-    console.log(`addNewPersonAxios url:${JSON.stringify(person,null,3)}`);
+    // console.log(`addNewPersonAxios url:${JSON.stringify(person,null,3)}`);
     return axios.post(url,person);
 };
 
 
 const deletePersonAxios = (id) =>{
     const url =`/api/persons/${id}`;
-    console.log(`deletePersonAxios url:${url}`);
+    // console.log(`deletePersonAxios url:${url}`);
     return axios.delete(url);
 }
 

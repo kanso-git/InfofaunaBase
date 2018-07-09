@@ -9,6 +9,7 @@ const initialState = {
     supportedLanguagesList:null,
     ongoingRequest: false,
     opreationType: null,
+    enableDelete:false
 };
 
 const userReducer = (state = initialState, action) => {
@@ -42,6 +43,7 @@ const userReducer = (state = initialState, action) => {
                 ...state,
                 roles: action.payload.roles,
                 groups: action.payload.groups,
+                enableDelete:action.payload.enableDelete,
                 error: null,
                 ongoingRequest: false
             };

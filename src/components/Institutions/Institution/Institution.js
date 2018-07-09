@@ -318,8 +318,7 @@ class Institution extends Component {
     }
 
     componentWillReceiveProps(nextProps){
-        console.log('componentWillReceiveProps .............');
-        console.log(nextProps);
+
         if( nextProps.institution.opreationType === types.ADD_OPREATION_TYPE ){
             const {id} = nextProps.match.params;
             if(id && id != this.props.match.params.id){
@@ -812,7 +811,7 @@ const InstitutionForm = withFormik({
     };
   },
   async handleSubmit(values, { props, resetForm, setErrors, setSubmitting }) {
-      console.log(JSON.stringify(values, null,3));
+
       if(props.match.params.id){
           const { id } = props.match.params;
           await props.updateInstitution(id, values);

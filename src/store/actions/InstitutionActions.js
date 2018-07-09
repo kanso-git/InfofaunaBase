@@ -57,13 +57,13 @@ const errorAddingNewInstitutionAction = payload => ({
 // axios
 const fetchInstitutionAxios = async id => {
   const url = `/api/institutions/${id}`;
-  console.log(`fetchInstitutionAxios url:${url}`);
+  // console.log(`fetchInstitutionAxios url:${url}`);
   return axios.get(url);
 };
 
 const fetchPersonsListAxios = async () => {
   const url = `/api/persons/list`;
-  console.log(`fetchPersonsListAxios url:${url}`);
+    // console.log(`fetchPersonsListAxios url:${url}`);
   return axios.get(url);
 };
 
@@ -75,20 +75,20 @@ const initiateFetchInstitution = () => dispatch =>
 
 const updateInstitutionAxios = async (id, updatedInstitution) => {
     const url =`/api/institutions/${id}`;
-    console.log(`updateInstitutionAxios url:${url} ,updatedInstitution:${JSON.stringify(updatedInstitution,null,3)} `);
+    // console.log(`updateInstitutionAxios url:${url} ,updatedInstitution:${JSON.stringify(updatedInstitution,null,3)} `);
     return axios.put(url,updatedInstitution);
 };
 
 const addNewInstitutionAxios = async (institution) => {
     const url =`/api/institutions/`;
-    console.log(`addNewInstitutionAxios url:${JSON.stringify(institution,null,3)}`);
+    // console.log(`addNewInstitutionAxios url:${JSON.stringify(institution,null,3)}`);
     return axios.post(url,institution);
 };
 
 
 const deleteInstitutionAxios = (id) =>{
     const url =`/api/institutions/${id}`;
-    console.log(`deleteInstitutionAxios url:${url}`);
+    // console.log(`deleteInstitutionAxios url:${url}`);
     return axios.delete(url);
 }
 
