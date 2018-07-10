@@ -380,7 +380,7 @@ class User extends Component {
     }
 
     addNofification = (message, title, level) => {
-        if (this.notificationInput.current) {
+        if (this.notificationInput.current && !this.httpError) {
             this.notificationInput.current.addNotification({
                 title: title,
                 message: message,
@@ -401,19 +401,35 @@ class User extends Component {
 
     renderAppRole = (role, roleGroups, setFieldValue) => {
 
+        let exportRoleId = null;
         let selectedGroups = null;
+        let exportableFlag = false;
         const userRoleSelectionStatus = roleGroups.findIndex(r => parseInt(r.roleId) === parseInt(role.id)) !== -1 ? true : false;
 
         if (role.groupFlag === types.USER_GRP_DEFINE) {
+
+            const exportRoleObj =   this.props.user.roles.filter(
+                r => r.application.id === role.application.id && r.name ==='EXPORT'
+            );
+            exportRoleId =exportRoleObj && exportRoleObj[0] ?exportRoleObj[0].id: null;
+
+           const  userExportableObjIndex =  roleGroups.findIndex(ug => parseInt(ug.roleId) === parseInt(exportRoleId));
+
+            exportableFlag = userExportableObjIndex !== -1 ? true: false;
+
             selectedGroups = this.props.user.groups.map(g => {
                 // check if this group is selected
-                const isSelected = roleGroups.findIndex(
+                const group = roleGroups.filter(
                     ug => parseInt(ug.roleId) === parseInt(role.id) && parseInt(ug.groupId) === parseInt(g.id)
                 );
 
+                const isSelected = group && group[0] ? true : false;
+                const isWritable = isSelected? group[0].writable: false;
+
                 return {
                     ...g,
-                    selected: isSelected !== -1
+                    selected: isSelected ,
+                    writable: isWritable
                 };
             });
         }
@@ -439,11 +455,17 @@ class User extends Component {
                 disabled={!this.state.enableEditMode}
                 isSelected={userRoleSelectionStatus}
                 isSameApp={isSameApp}
+                exportableFlag={exportableFlag}
+                exportRoleId={exportRoleId}
                 groups={selectedGroups}
                 roleChange={e => this.handleRoleChange(e, roleGroups, setFieldValue)}
                 groupChangeAll={e =>
                     this.handleGroupChangeAll(e, roleGroups, setFieldValue)
                 }
+                groupWriteChangeAll={e =>
+                    this.handleWriteGroupChangeAll(e, roleGroups, setFieldValue)
+                }
+
                 groupChange={e =>
                     this.handleGroupChange(
                         e,
@@ -453,53 +475,75 @@ class User extends Component {
                         this.props.user.groups
                     )
                 }
+
+                groupWriteChange={e =>
+                    this.handleWriteGroupChange(
+                        e,
+                        role.id,
+                        setFieldValue,
+                        roleGroups
+                    )
+                }
+
+                exportChange={e =>
+                    this.handleExportChange(e, roleGroups, setFieldValue)
+                }
             />
         );
     };
 
+    // when user select/unselect a role
+    // role with groupFlag = "N/A" =>
+    // role with groupFlag = "UGD" => off => on is not allowed , off=>on is allowed
     handleRoleChange = (e, roleGroups, setFieldValueFn) => {
+        const {id, checked} = e.currentTarget; // checked is the futur status
+        const selectedRole = this.props.user.roles.filter(r => parseInt(r.id) === parseInt(id));
 
-        const {id, checked} = e.currentTarget;
-        const seelctedRole = this.props.user.roles.filter(r => r.id == id);
+        if (selectedRole[0].groupFlag === types.USER_GRP_DEFINE) {
 
-        if (seelctedRole[0].groupFlag === types.NOT_APPLICABLE) {
-            if (!checked) {
-                const updateRoleGroups = roleGroups.filter(rg => !(rg.roleId == id));
-                setFieldValueFn('roleGroups', updateRoleGroups);
+            // this means the check was off and the user check it
+            if (checked) {
+                // this is not allowed since the user has to define the groups
             } else {
-                let updateRoleGroups = roleGroups;
-                this.props.user.groups.map(g => {
-                    const groupALreadyExist = roleGroups.findIndex(
-                        rg => rg.roleId == id && rg.groupId == g.id
-                    );
-                    if (groupALreadyExist === -1) {
-                        updateRoleGroups = [
-                            ...updateRoleGroups,
-                            {id: -1, roleId: parseInt(id), groupId: parseInt(g.id)}
-                        ];
-                    }
-                });
+                // else case : this means the check was on and the user uncheck it
+                // remove all the selected groups with their writable flags
+                const updateRoleGroups = roleGroups.filter(rg => !(parseInt(rg.roleId) === parseInt(id)));
                 setFieldValueFn('roleGroups', updateRoleGroups);
             }
-        } else {
-            if (!checked) {
-                const updateRoleGroups = roleGroups.filter(rg => !(rg.roleId == id));
+        }else if(selectedRole[0].groupFlag === types.NOT_APPLICABLE){
+
+            if(checked){
+                const roleALreadyExist = roleGroups.findIndex(
+                    rg => parseInt(rg.roleId) === parseInt(id)
+                );
+                if (roleALreadyExist === -1) {
+                    const updateRoleGroups = [
+                        ...roleGroups,
+                        {roleId: parseInt(id), groupId: null}
+                    ];
+                    setFieldValueFn('roleGroups', updateRoleGroups);
+                }
+            }else{
+                const updateRoleGroups = roleGroups.filter(rg => !(parseInt(rg.roleId) === parseInt(id)));
                 setFieldValueFn('roleGroups', updateRoleGroups);
             }
+
         }
     };
+
+    // trigger the below function when user select all/ unselect all  groups
     handleGroupChangeAll = (e, roleGroups, setFieldValueFn) => {
         const {id, checked} = e.currentTarget;
         let updateRoleGroups = roleGroups;
         if (checked) {
             this.props.user.groups.map(g => {
                 const groupALreadyExist = roleGroups.findIndex(
-                    rg => rg.roleId == id && rg.groupId == g.id
+                    rg => parseInt(rg.roleId) === parseInt(id) && parseInt(rg.groupId) === parseInt(g.id)
                 );
                 if (groupALreadyExist === -1) {
                     updateRoleGroups = [
                         ...updateRoleGroups,
-                        {id: -1, roleId: parseInt(id), groupId: parseInt(g.id)}
+                        {roleId: parseInt(id), groupId: parseInt(g.id),  writable:false}
                     ];
                 }
             });
@@ -509,27 +553,103 @@ class User extends Component {
             setFieldValueFn('roleGroups', updateRoleGroups);
         }
     };
+
+    // trigger the below function when user select all/ unselect write flag for all  groups
+    // all groups already selected ..
+    handleWriteGroupChangeAll = (e, roleGroups, setFieldValueFn) => {
+        const {id, checked} = e.currentTarget;
+        const updateRoleGroups = roleGroups.map(rg => {
+            if(parseInt(rg.roleId) === parseInt(id)){
+               return {
+                   ...rg,
+                   writable:checked
+               }
+            }
+            return rg;
+        });
+
+        setFieldValueFn('roleGroups', updateRoleGroups);
+    };
+
+    // trigger the below function when user select/unselect a group
     handleGroupChange = (e, roleId, setFieldValueFn, roleGroups, allGroups) => {
         const {id} = e.currentTarget;
+        
         const groupALreadyExist = roleGroups.findIndex(
-            rg => rg.roleId === roleId && rg.groupId == id
+            rg => parseInt(rg.roleId) === parseInt(roleId) && parseInt(rg.groupId) === parseInt(id)
         );
         let updateRoleGroups;
         if (groupALreadyExist !== -1) {
             // if exist
             updateRoleGroups = roleGroups.filter(
-                rg => !(rg.roleId === roleId && rg.groupId == id)
+                rg => !(parseInt(rg.roleId) === parseInt(roleId) && parseInt(rg.groupId) === parseInt(id))
             );
         } else {
             // not exist  add it
-            const groupToAdd = allGroups.find(rg => rg.id == id);
+            const groupToAdd = allGroups.find(rg => parseInt(rg.id) === parseInt(id));
             updateRoleGroups = [
                 ...roleGroups,
-                {id: -1, roleId, groupId: groupToAdd.id}
+                { roleId, groupId: groupToAdd.id, writable: false}
             ];
         }
-        // console.log(updateRoleGroups);
         setFieldValueFn('roleGroups', updateRoleGroups);
+    };
+
+    // trigger the below function when user select/unselect a write on group
+    handleWriteGroupChange = (e, roleId, setFieldValueFn, roleGroups) => {
+        const {id,checked} = e.currentTarget;
+        const updateRoleGroups = roleGroups.map(
+            rg => {
+                if(parseInt(rg.roleId) === parseInt(roleId) && parseInt(rg.groupId) === parseInt(id)){
+                    return {
+                        ...rg,
+                        writable:checked
+                    }
+                }
+                return rg;
+            }
+        );
+        setFieldValueFn('roleGroups', updateRoleGroups);
+    };
+
+    handleExportChange = (e, roleGroups, setFieldValueFn ) => {
+        const {id} = e.currentTarget;
+
+        const exportALreadyExist = roleGroups.findIndex(
+            rg => parseInt(rg.roleId) === parseInt(id)
+        );
+        let updateRoleGroups;
+        if (exportALreadyExist !== -1) {
+            // if exist remove it
+            updateRoleGroups = roleGroups.filter(
+                rg => !(parseInt(rg.roleId) === parseInt(id) )
+            );
+        } else {
+            // not exist  add it
+            updateRoleGroups = [
+                ...roleGroups,
+                {roleId:parseInt(id) , groupId: null}
+            ];
+        }
+        setFieldValueFn('roleGroups', updateRoleGroups);
+    };
+
+    // delete btn visibility depends on the currentUser porfile Vs the displayed user and the mode of the page
+    renderDeleteButton = ()=>{
+
+        if(this.props.match.params.id && this.props.user.enableDelete){
+            return(
+                <Button
+                    className={this.props.classes.button}
+                    variant="raised"
+                    color="secondary"
+                    onClick={() => this.setState(() => ({dialog: true}))}
+                >
+                    {this.props.t('User Delete')}
+                    <Delete className={this.props.classes.rightIcon}/>
+                </Button>
+            )
+        }
     };
 
     render() {
@@ -606,7 +726,7 @@ class User extends Component {
                         </NavLink>
                         &nbsp;>&nbsp;
                         {this.props.match.params.id ? (
-                            <span className={classes.actualSite}> {t('User Detail')}</span>
+                            <span className={classes.actualSite}> {t('User Details')}</span>
                         ) : (
                             <span className={classes.actualSite}> {t('User User New')}</span>
                         )}
@@ -778,12 +898,7 @@ class User extends Component {
 
                                     <FormControl
                                         className={classes.formControl}
-                                        error={
-                                            touched.passwordConfirm && errors.passwordConfirm
-                                                ? true
-                                                : false
-                                        }
-                                    >
+                                        error={touched.passwordConfirm && errors.passwordConfirm} >
                                         <InputLabel htmlFor="name">
                                             *{t('User Confirm Password')}
                                         </InputLabel>
@@ -815,6 +930,7 @@ class User extends Component {
                             <Typography component="p">Roles</Typography>
                             {this.props.user.roles
                                 ? this.props.user.roles
+                                    .filter(g => g.name.indexOf('EXPORT') === -1)
                                     .sort((a, b) =>
                                         ('' + a.application.code + a.name).localeCompare(
                                             b.application.code + b.name
@@ -840,20 +956,8 @@ class User extends Component {
                                     <Save className={classNames(classes.rightIcon)}/>
                                     {t('User Save')}
                                 </Button>
+                                {this.renderDeleteButton()}
 
-                                {this.props.match.params.id ? (
-                                    <Button
-                                        className={classes.button}
-                                        variant="raised"
-                                        color="secondary"
-                                        onClick={() => this.setState(() => ({dialog: true}))}
-                                    >
-                                        {t('User Delete')}
-                                        <Delete className={classes.rightIcon}/>
-                                    </Button>
-                                ) : (
-                                    ''
-                                )}
                             </div>
                         )}
                     </Form>
@@ -878,6 +982,8 @@ const UserForm = withFormik({
         return {
             username: user.data && user.data.username ? user.data.username : '',
             personId: user.data && user.data.person ? user.data.person.id : '',
+            password:'',
+            passwordConfirm:'',
             languageId: user.data && user.data.languageId ? user.data.languageId : '',
             ldap: user.data && user.data.ldap ? user.data.ldap : false,
             roleGroups: user.data && user.data.roleGroups ? user.data.roleGroups : []
@@ -885,16 +991,47 @@ const UserForm = withFormik({
     },
     async handleSubmit(values, {props, resetForm, setErrors, setSubmitting}) {
         // console.log('**************************');
-
+        this.httpError = null;
         if (props.match.params.id) {
             const {id} = props.match.params;
-            // console.log(JSON.stringify(values, null, 3));
-            await props.updateUser(id, values);
-            await props.fetchUser(id);
-            setSubmitting(false);
+            const roleGroups = values.roleGroups.map(rg =>{
+                const {roleId, groupId} = rg;
+
+                let row = null;
+                if(groupId != null){
+                    row = props.user.data.roleGroups.find(r=>parseInt(r.roleId) === parseInt(roleId) && parseInt(r.groupId) === parseInt(groupId) );
+                }else{
+                    row = props.user.data.roleGroups.find(r=>parseInt(r.roleId) === parseInt(roleId));
+                }
+
+                return {
+                    id: row ? row.id : null,
+                    userId:parseInt(props.match.params.id),
+                    roleId,
+                    groupId:rg.groupId,
+                    writable: rg.writable
+                }
+            });
+            values.roleGroups =roleGroups;
+            console.log(JSON.stringify(values, null, 3));
+             try{
+                 await props.updateUser(id, values);
+                 await props.fetchUser(id);
+                 setSubmitting(false);
+             }catch(e){
+                 this.httpError = e;
+                 throw e;
+             }
         } else {
-            const response = await props.addNewUser(values);
-            setTimeout(() => props.history.push(response.headers.location), 200);
+            try{
+                const response = await props.addNewUser(values);
+               if(response && response.headers) {
+                   setTimeout(() => props.history.push(response.headers.location), 200);
+               }
+            }catch(e){
+                this.httpError = e;
+                throw e;
+            }
         }
     },
     isInitialValid: props => (props.match.params.id ? true : false),

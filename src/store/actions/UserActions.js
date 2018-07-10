@@ -148,9 +148,12 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
           const roleListAxios = await fetchRoleListAxios();
 
           // manage the export role inside the user role
-          roleList = roleListAxios.data.filter(
-            g => g.name.indexOf('EXPORT') === -1
-          );
+          /*
+              roleList = roleListAxios.data.filter(
+                  g => g.name.indexOf('EXPORT') === -1
+              );
+          */
+           roleList = roleListAxios.data;
 
           if (authHelper.currentUserHasInfofaunaManagerPermission()) {
             // case : view or modify existing user

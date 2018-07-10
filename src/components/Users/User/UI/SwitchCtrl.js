@@ -5,6 +5,7 @@ import Switch from '@material-ui/core/Switch';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import green from '@material-ui/core/colors/green';
 import Checkbox from '@material-ui/core/Checkbox';
+import ModeEdit from '@material-ui/icons/ModeEdit';
 
 const styles = theme => ({
     root: {
@@ -59,8 +60,8 @@ class SwitchCtrl extends React.Component {
 
     render(){
         const { classes } = this.props;
-        const {checked, handleChange,extraMagrinLeft, disabled,label, id, name, writeFalg, exportFalg} = this.props;
-        const style = extraMagrinLeft? {marginLeft:30} :{}
+        const {checked, handleChange,writeFlagChange,extraMagrinLeft, disabled,label, id, name, writeFalg, exportRoleId,writableFlag, exportChange, exportableFlag} = this.props;
+        const style = extraMagrinLeft? {marginLeft:25} :{}
         return (
             <Fragment>
                 <FormControlLabel
@@ -86,12 +87,13 @@ class SwitchCtrl extends React.Component {
                     style={style}
 
                 />
-                {exportFalg? (
+                {exportRoleId? (
                 <FormControlLabel
                     control={
                         <Checkbox
-                            checked={true}
-                            value="checkedG"
+                            checked={exportableFlag? true: false}
+                            id={''+exportRoleId}
+                            onChange={exportChange}
                             classes={{
                                 root: classes.root,
                                 checked: classes.checked,
@@ -101,19 +103,23 @@ class SwitchCtrl extends React.Component {
                     label="Export"
                 />):null}
                 {(checked && writeFalg) ? (
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={true}
-                                value="checkedG"
-                                classes={{
-                                    root: classes.root,
-                                    checked: classes.checked,
-                                }}
-                            />
-                        }
-                        label="Write"
-                    />
+                    <Fragment>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={writableFlag ? true: false}
+                                    id={id}
+                                    onChange={writeFlagChange}
+                                    classes={{
+                                        root: classes.root,
+                                        checked: classes.checked,
+                                    }}
+                                />
+                            }
+                            label="Write"
+                        />
+                    </Fragment>
+
                 ): null}
 
 
