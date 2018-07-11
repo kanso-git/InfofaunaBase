@@ -405,7 +405,7 @@ class User extends Component {
         let selectedGroups = null;
         let exportableFlag = false;
         const userRoleSelectionStatus = roleGroups.findIndex(r => parseInt(r.roleId) === parseInt(role.id)) !== -1 ? true : false;
-
+debugger;
         if (role.groupFlag === types.USER_GRP_DEFINE) {
 
             const exportRoleObj =   this.props.user.roles.filter(

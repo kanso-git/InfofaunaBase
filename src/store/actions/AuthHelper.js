@@ -52,7 +52,6 @@ const currentUserManagerPermissionsArray = () => {
             p => p.endsWith(':manager')
         );
     }
-    debugger
     return filteredManagerPermissions;
 };
 
