@@ -733,7 +733,7 @@ class User extends Component {
                     </Typography>
 
                     {this.props.match.params.id &&
-                    authHelper.currentUserHasInfofaunaManagerPermission() ? (
+                    authHelper.currentUserManagerPermissionsArray().length>0 ? (
                         <div style={{float: 'right'}}>
                             <Tooltip id="tooltip-fab" title={t('Form Enable edit mode')}>
                                 <FormControlLabel
@@ -944,7 +944,7 @@ class User extends Component {
                         </Paper>
                         <br/>
                         {this.state.enableEditMode &&
-                        authHelper.currentUserHasInfofaunaManagerPermission() && (
+                        authHelper.currentUserManagerPermissionsArray().length>0 && (
                             <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                                 <Button
                                     className={classes.button}
@@ -994,7 +994,7 @@ const UserForm = withFormik({
         this.httpError = null;
         if (props.match.params.id) {
             const {id} = props.match.params;
-            const roleGroups = values.roleGroups.map(rg =>{
+            const updatedRoleGroups = values.roleGroups.map(rg =>{
                 const {roleId, groupId} = rg;
 
                 let row = null;
@@ -1007,24 +1007,55 @@ const UserForm = withFormik({
                 return {
                     id: row ? row.id : null,
                     userId:parseInt(props.match.params.id),
-                    roleId,
+                    roleId:roleId,
                     groupId:rg.groupId,
                     writable: rg.writable
                 }
             });
-            values.roleGroups =roleGroups;
+            let deletedRoleGroups = [];
+            props.user.data.roleGroups.forEach(rg=>{
+                const {id, roleId, groupId} = rg;
+                let row = null;
+                if(groupId != null){
+                    row = updatedRoleGroups.find(r=>parseInt(r.roleId) === parseInt(roleId) && parseInt(r.groupId) === parseInt(groupId) );
+                }else{
+                    row = updatedRoleGroups.find(r=>parseInt(r.roleId) === parseInt(roleId));
+                }
+                if(!row){
+                    const newRg= {
+                        ...rg,
+                        deleted:true
+                    }
+                    deletedRoleGroups.push(newRg) ;
+                }
+            });
+            values.roleGroups = deletedRoleGroups.length >0 ? [...updatedRoleGroups,...deletedRoleGroups] :[...updatedRoleGroups];
             console.log(JSON.stringify(values, null, 3));
+
              try{
-                 await props.updateUser(id, values);
-                 await props.fetchUser(id);
-                 setSubmitting(false);
+                  await props.updateUser(id, values);
+                  await props.fetchUser(id);
+                  setSubmitting(false);
              }catch(e){
                  this.httpError = e;
                  throw e;
              }
         } else {
             try{
-                const response = await props.addNewUser(values);
+                const newroleGroups = values.roleGroups.map(rg =>{
+                    const {roleId} = rg;
+                    return {
+                        id: null,
+                        userId:null,
+                        roleId:roleId,
+                        groupId:rg.groupId,
+                        writable: rg.writable?rg.writable: false
+                    }
+                });
+                debugger
+               values.roleGroups =newroleGroups.length >0 ? [...newroleGroups] : [];
+               console.log(JSON.stringify(values, null, 3));
+               const response = await props.addNewUser(values);
                if(response && response.headers) {
                    setTimeout(() => props.history.push(response.headers.location), 200);
                }

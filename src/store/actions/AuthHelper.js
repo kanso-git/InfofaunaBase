@@ -1,6 +1,7 @@
 import {isNullOrUndefined} from 'util';
 import _ from 'lodash';
 import {LOCAL_STORAGE_USER_KEY} from './Types';
+import * as types from "./Types";
 
 let currentUser;
 
@@ -9,9 +10,7 @@ const loadCurrentUserFromLocalStorage = () => {
 };
 
 const getCurrentUser = () => {
-    if (!currentUser) {
-        currentUser = loadCurrentUserFromLocalStorage();
-    }
+    currentUser = loadCurrentUserFromLocalStorage();
     return currentUser;
 };
 
@@ -53,6 +52,7 @@ const currentUserManagerPermissionsArray = () => {
             p => p.endsWith(':manager')
         );
     }
+    debugger
     return filteredManagerPermissions;
 };
 
@@ -60,6 +60,35 @@ const currentUserHasMidatManagerPermission = () => {
     return currentUserHasPermission('midat:manager');
 };
 
+
+
+const  getCookieKeys = () =>
+{
+   // Separate key  value pairs
+    let cookies = document.cookie.split(";"),
+        index, keys = [];
+    for(let i = 0; i < cookies.length; i++) {
+        const cookieEntry = cookies[i].split("=");
+        //first part of the split string holds the key ...
+        keys.push(cookieEntry[0]);
+    }
+    return keys;
+}
+
+const cleanLocalStorageAndDocumentCookie = ()=>{
+    try{
+        localStorage.removeItem(types.LOCAL_STORAGE_USER_KEY);
+        const cookieKeys = getCookieKeys();
+
+        for(let i = 0; i < cookieKeys.length; i++) {
+            console.log(cookieKeys[i]);
+           // document.cookie = cookieKeys[i]+'=; expires=Thu, 2 Aug 2001 20:47:11 UTC; path='
+        }
+
+    }catch (e) {
+        debugger;
+    }
+}
 export {
     loadCurrentUserFromLocalStorage,
     getCurrentUser,
@@ -67,6 +96,7 @@ export {
     currentUserHasRole,
     currentUserHasInfofaunaUserPermission,
     currentUserHasInfofaunaManagerPermission,
-    currentUserManagerPermissionsArray
+    currentUserManagerPermissionsArray,
+    cleanLocalStorageAndDocumentCookie
 
 };
