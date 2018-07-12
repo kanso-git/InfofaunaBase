@@ -56,7 +56,7 @@ const styles = theme => ({
 });
 
 class Role extends Component {
-    renderGroupInfo = (info, groups) => {
+    renderGroupInfo = (info, groups,isReadOnly) => {
         const {classes} = this.props;
 
         return (
@@ -77,7 +77,7 @@ class Role extends Component {
                                     label="Select all groups"
                                     handleChange={this.props.groupChangeAll}
                                     writeFlagChange={this.props.groupWriteChangeAll}
-                                    disabled={this.props.disabled}
+                                    disabled={this.props.disabled || isReadOnly}
                                     exportChange={this.props.exportChange}
                                 />
                             }
@@ -97,7 +97,7 @@ class Role extends Component {
                                     <SwitchCtrl
                                         handleChange={this.props.groupChange}
                                         writeFlagChange={this.props.groupWriteChange}
-                                        disabled={this.props.disabled}
+                                        disabled={this.props.disabled || isReadOnly}
                                         writableFlag={g.writable}
                                         writeFalg
                                         key={g.id}
@@ -125,12 +125,13 @@ class Role extends Component {
             return '';
         }
     };
-    renderSelectionIndicator = () => {
+    renderRoleWithoutGroupsPanel = () => {
 
         if (this.props.readOnly || this.props.readOnlyAndSelected) {
             if (this.props.isSelected || this.props.readOnlyAndSelected) {
                 return (
-                    <Fragment>
+                    <ExpansionPanel defaultExpanded={true} expanded={true}>
+                        <ExpansionPanelSummary>
                         <Lock style={{color: 'orange', fontSize: 28, opacity: 0.6, marginTop: 10, marginRight: 10}}/>
                         <SwitchCtrl
                             checked={true}
@@ -138,12 +139,17 @@ class Role extends Component {
                             disabled={true}
                             label={this.props.application.code + ' / ' + this.props.name}
                         />
-                    </Fragment>
+                            <Typography className={this.props.classes.secondaryHeading}>
+                                {this.props.description}
+                            </Typography>
+                        </ExpansionPanelSummary>
+                    </ExpansionPanel>
                 )
             } else {
                 // read only but not selected
                 return (
-                    <Fragment>
+                    <ExpansionPanel defaultExpanded={true} expanded={true}>
+                        <ExpansionPanelSummary>
                         <Lock style={{color: 'orange', fontSize: 28, opacity: 0.6, marginTop: 10, marginRight: 10}}/>
                         <SwitchCtrl
                             checked={false}
@@ -151,14 +157,19 @@ class Role extends Component {
                             disabled={true}
                             label={this.props.application.code + ' / ' + this.props.name}
                         />
-                    </Fragment>
+                            <Typography className={this.props.classes.secondaryHeading}>
+                                {this.props.description}
+                            </Typography>
+                        </ExpansionPanelSummary>
+                    </ExpansionPanel>
                 )
             }
 
         } else {
             // means readOnly is false and readOnlyAndSelected is false or null
             return (
-                <Fragment>
+                <ExpansionPanel defaultExpanded={true} expanded={true}>
+                    <ExpansionPanelSummary>
                     <SwitchCtrl
                         checked={this.props.isSelected}
                         id={'' + this.props.id}
@@ -167,29 +178,71 @@ class Role extends Component {
                         label={this.props.application.code + ' / ' + this.props.name}
                         extraMagrinLeft
                     />
-                </Fragment>
+                    <Typography className={this.props.classes.secondaryHeading}>
+                        {this.props.description}
+                    </Typography>
+                </ExpansionPanelSummary>
+                </ExpansionPanel>
             )
         }
     }
-    renderCustomPanel = () => {
-        const {isSelected, classes} = this.props;
-        if (this.props.groupFlag !== types.USER_GRP_DEFINE) {
-            return (
-                <ExpansionPanel defaultExpanded={true} expanded={true}>
-                    <ExpansionPanelSummary>
-                        {this.renderSelectionIndicator()}
-                        <Typography className={classes.secondaryHeading}>
-                            {this.props.description}
-                        </Typography>
-                    </ExpansionPanelSummary>
-                </ExpansionPanel>
-            );
+
+    renderRoleWithGroupsPanel = () => {
+
+        if (this.props.readOnly || this.props.readOnlyAndSelected) {
+            if (this.props.isSelected || this.props.readOnlyAndSelected) {
+                return (
+                    <ExpansionPanel defaultExpanded={false}>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+                            <Lock style={{color: 'orange', fontSize: 28, opacity: 0.6, marginTop: 10, marginRight: 10}}/>
+                            <SwitchCtrl
+                                checked={true}
+                                disabled={true}
+                                id={'' + this.props.id}
+                                label={
+                                    this.props.application.code +
+                                    ' / ' +
+                                    this.props.name +
+                                    this.renderGroupNameOrNumber()
+                                }
+                            />
+                        </ExpansionPanelSummary>
+                        {this.renderGroupInfo(this.props.groupFlag, this.props.groups, true)}
+                    </ExpansionPanel>
+                )
+            } else {
+                // read only but not selected
+                return (
+                    <ExpansionPanel defaultExpanded={false}>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+                            <Lock style={{color: 'orange', fontSize: 28, opacity: 0.6, marginTop: 10, marginRight: 10}}/>
+
+                            <SwitchCtrl
+                                checked={false}
+                                disabled={true}
+                                id={'' + this.props.id}
+                                label={
+                                    this.props.application.code +
+                                    ' / ' +
+                                    this.props.name +
+                                    this.renderGroupNameOrNumber()
+                                }
+
+                            />
+                        </ExpansionPanelSummary>
+                        {this.renderGroupInfo(this.props.groupFlag, this.props.groups,true)}
+                    </ExpansionPanel>
+                )
+            }
+
         } else {
+            // means readOnly is false and readOnlyAndSelected is false or null
             return (
                 <ExpansionPanel defaultExpanded={false}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+
                         <SwitchCtrl
-                            checked={isSelected}
+                            checked={this.props.isSelected}
                             disabled={this.props.disabled}
                             id={'' + this.props.id}
                             handleChange={this.props.roleChange}
@@ -201,18 +254,24 @@ class Role extends Component {
                             }
                             extraMagrinLeft
                         />
+
                     </ExpansionPanelSummary>
-                    {this.renderGroupInfo(this.props.groupFlag, this.props.groups)}
+                    {this.renderGroupInfo(this.props.groupFlag, this.props.groups,false)}
                 </ExpansionPanel>
-            );
+            )
         }
     };
+
 
     render() {
         const {classes} = this.props;
         return (
             <div className={this.props.isSameApp ? null : classes.wrapper}>
-                {this.renderCustomPanel()}
+                {
+                    this.props.groupFlag !== types.USER_GRP_DEFINE ?
+                                this.renderRoleWithoutGroupsPanel() : this.renderRoleWithGroupsPanel()
+
+                }
             </div>
         );
     }

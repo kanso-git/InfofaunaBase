@@ -147,6 +147,7 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
         try {
           const roleListAxios = await fetchRoleListAxios();
 
+
           // manage the export role inside the user role
           /*
               roleList = roleListAxios.data.filter(
@@ -156,6 +157,7 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
            roleList = roleListAxios.data;
 
           if (authHelper.currentUserHasInfofaunaManagerPermission()) {
+
             // case : view or modify existing user
             if (userId) {
 
@@ -184,6 +186,7 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
 
                   // currentUser profile > data user profile
                   enableDelete = true;
+
               }
             } else {
               // case : add new , can give all roles to the new created user  except infofauna manager role
@@ -193,15 +196,18 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
                 }));
             }
           } else if (authHelper.currentUserManagerPermissionsArray().length > 0) {
+
             // case : view or modify existing user ( e.g logged user with mds manager role )
             if (userId) {
+
                 const userDataHasInfofaunaManagerRole = userData.permissions.findIndex(p =>p.endsWith('infofauna:manager'));
+
                 if(userDataHasInfofaunaManagerRole !== -1){
                     // currentUser has AppManagerRole =>  dataUser InfofaunaManagerRole
                     // view or modify  another user (another user has infofauna:manager role)
                     roleList = roleList.map(r => ({
                         ...r,
-                        readOnlyAndSelected: !(r.application.code.toLowerCase() === 'infofauna' || r.name.toLowerCase() === 'manager')
+                        readOnlyAndSelected: (r.application.code.toLowerCase() === 'infofauna' || r.name.toLowerCase() === 'manager')
                     }));
                     // current connected user (app:manager ) can only add/remove  user rights for the app manager he owens
                     roleList = roleList.map(r=>{
@@ -219,6 +225,7 @@ const loadRolesAndGroupsData = userId => async (dispatch, getState) => {
                         return r ; // since the manager is already flagged with readOnlyAndSelected
                       }
                     });
+
                     // currentUser  profile < data user profile
                     enableDelete = false;
                 }else {

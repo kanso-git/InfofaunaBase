@@ -98,6 +98,7 @@ class SwitchCtrl extends React.Component {
                                 root: classes.root,
                                 checked: classes.checked,
                             }}
+                            disabled={disabled}
                         />
                     }
                     label="Export"
@@ -114,6 +115,7 @@ class SwitchCtrl extends React.Component {
                                         root: classes.root,
                                         checked: classes.checked,
                                     }}
+                                    disabled={disabled}
                                 />
                             }
                             label="Write"
